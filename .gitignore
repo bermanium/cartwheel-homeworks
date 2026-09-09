@@ -10,6 +10,7 @@ data/cartwheel.db
 # Local homework progress note and capture helper, not submission files.
 hw1-progress.md
 hw1_capture.py
+hw1-video-script.md
 
 # Local conversation state and scenario/replay run outputs.
 .sessions.db
