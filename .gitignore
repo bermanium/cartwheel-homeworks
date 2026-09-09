@@ -7,8 +7,13 @@
 # Generated world data. Recreate with: uv run python -m seed.generate
 data/cartwheel.db
 
+# Local homework progress note and capture helper, not submission files.
+hw1-progress.md
+hw1_capture.py
+
 # Local conversation state and scenario/replay run outputs.
 .sessions.db
+.sessions.db-*
 scenarios/results/
 replay/results/
 
