@@ -200,11 +200,17 @@ async def post_message(
     _, session = _SESSIONS[session_id]
 
     agent = build_agent(ctx, model=body.model)
-    version = prompt_version(render_system_prompt(ctx))
+    # The template only, not the rendered prompt: one prompt, one hash, the
+    # same for every caller. Rendering it per user would make the version a
+    # fingerprint of "prompt plus who asked", which is useless for grouping.
+    version = prompt_version()
     record_content = _trace_content_enabled()
 
     with _tracer.start_as_current_span("cartwheel.session_message") as span:
         if span.is_recording():
+            # Groups every turn of one conversation, and makes a trace
+            # findable from the session id the caller was handed back.
+            span.set_attribute("cartwheel.session_id", session_id)
             span.set_attribute("cartwheel.user_role", ctx.role)
             # An id is a label spelled with digits, not a number.
             span.set_attribute("cartwheel.user_id", str(ctx.user_id))

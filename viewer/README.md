@@ -32,10 +32,14 @@ them in the background, four at a time; the header shows `scanning 7/12` until
 that finishes. An un-scanned trace is hidden by a Tool or Status filter rather
 than shown as a maybe.
 
-Prompt version is the one to reach for when comparing prompts. Note that the
-hash covers the *rendered* prompt, which embeds the caller's role, user id and
-store, so each role has its own hash even on an unchanged template. Combining
-Prompt version with Role is what isolates a genuine prompt change.
+Prompt version is the one to reach for when comparing prompts. The hash covers
+the prompt *template*, before the caller's role and ids are injected, so one
+prompt has one hash across every user and a change in the filter really does
+mean a change in the prompt.
+
+Traces recorded before September 2026 carry per-user hashes from the earlier
+scheme, so an old shopper run and an old merchant run of the same prompt show
+up as two different versions. That is history, not a bug.
 
 **Right**, one trace:
 

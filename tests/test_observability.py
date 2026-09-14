@@ -15,7 +15,7 @@ from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import SimpleSpanProcessor
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
-from agent.agent import build_agent, prompt_version, render_system_prompt
+from agent.agent import build_agent, prompt_version
 from agent.auth import AuthContext, permission_denied
 from observability.instrument import record_tool_result
 from tests.eval.fake_model import FakeModel, text_message
@@ -48,8 +48,9 @@ def tool_span():
 def test_tool_span_records_merchant_identity(tool_span) -> None:
     attrs = tool_span(MERCHANT, {"ok": True, "order": {"id": 4127}})
     assert attrs["cartwheel.user_role"] == "merchant"
-    assert attrs["cartwheel.user_id"] == "9002"  # a string, not an int
-    assert attrs["cartwheel.store_id"] == 2  # an int, not a string
+    # Both are strings: an id is a label spelled with digits, not a number.
+    assert attrs["cartwheel.user_id"] == "9002"
+    assert attrs["cartwheel.store_id"] == "2"
     assert attrs["cartwheel.permission_denied"] is False
     assert "cartwheel.permission_denied.reason" not in attrs
 
@@ -140,9 +141,8 @@ def test_root_span_records_the_authenticated_identity(endpoint) -> None:
     response, attrs = endpoint()
     assert attrs["cartwheel.user_role"] == "shopper"
     assert attrs["cartwheel.user_id"] == "1"  # a string, not an int
-    assert attrs["cartwheel.prompt_version"] == prompt_version(
-        render_system_prompt(SHOPPER)
-    )
+    assert attrs["cartwheel.prompt_version"] == prompt_version()
+    assert attrs["cartwheel.session_id"] == response["session_id"]
     assert response == {
         "session_id": response["session_id"],
         "reply": REPLY,
@@ -150,15 +150,28 @@ def test_root_span_records_the_authenticated_identity(endpoint) -> None:
     }
 
 
-def test_root_span_records_the_merchants_own_prompt_version(endpoint) -> None:
-    """A different identity renders a different prompt, so a different hash."""
+def test_the_prompt_version_is_the_same_for_every_caller(endpoint) -> None:
+    """One prompt, one hash.
+
+    The version identifies the *template*, not the rendered prompt, so two
+    roles running the same prompt must agree. Hashing the rendered text
+    instead would make the version a fingerprint of "prompt plus who asked",
+    and Module 2 could not group traces by the prompt that produced them.
+    """
     _, shopper = endpoint()
     _, merchant = endpoint(user_id=9002, role="merchant")
     assert merchant["cartwheel.user_role"] == "merchant"
-    assert merchant["cartwheel.prompt_version"] == prompt_version(
-        render_system_prompt(MERCHANT)
-    )
-    assert merchant["cartwheel.prompt_version"] != shopper["cartwheel.prompt_version"]
+    assert merchant["cartwheel.prompt_version"] == shopper["cartwheel.prompt_version"]
+    assert merchant["cartwheel.prompt_version"] == prompt_version()
+
+
+def test_each_session_is_recorded_on_its_own_root_span(endpoint) -> None:
+    """The session id is what joins a trace back to a conversation."""
+    first, first_attrs = endpoint()
+    second, second_attrs = endpoint()
+    assert first_attrs["cartwheel.session_id"] == first["session_id"]
+    assert second_attrs["cartwheel.session_id"] == second["session_id"]
+    assert first_attrs["cartwheel.session_id"] != second_attrs["cartwheel.session_id"]
 
 
 def test_scenario_id_is_recorded_only_when_one_is_supplied(endpoint) -> None:

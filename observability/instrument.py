@@ -126,8 +126,9 @@ def record_tool_result(ctx: "AuthContext", result: dict[str, Any]) -> None:
     # An id is a label spelled with digits, not a number to do arithmetic on.
     span.set_attribute("cartwheel.user_id", str(ctx.user_id))
     # AuthContext sets store_id only for merchants, and requires it for them.
+    # A string, like user_id: an id is a label spelled with digits.
     if ctx.store_id is not None:
-        span.set_attribute("cartwheel.store_id", ctx.store_id)
+        span.set_attribute("cartwheel.store_id", str(ctx.store_id))
     _set_permission_denied_attributes(span, result)
 
 
