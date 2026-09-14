@@ -1,0 +1,24 @@
+[
+  {
+    "trace_id": "0387fdfbbaf36766036928b29d9d1c87",
+    "permalink": "https://cloud.langfuse.com/project/cmu1lahfu01cjad0i9x3p4zf3/traces/0387fdfbbaf36766036928b29d9d1c87",
+    "prompt_version": "dbf20dda5f53",
+    "user_role": "merchant",
+    "user_id": 9002,
+    "tool_order": [
+      "get_order"
+    ],
+    "final_status": "completed"
+  },
+  {
+    "trace_id": "a9540ed2c05d16f6dbe092cef44ee75e",
+    "permalink": "https://cloud.langfuse.com/project/cmu1lahfu01cjad0i9x3p4zf3/traces/a9540ed2c05d16f6dbe092cef44ee75e",
+    "prompt_version": "395b3a6dcd51",
+    "user_role": "shopper",
+    "user_id": 1,
+    "tool_order": [
+      "escalate_to_human"
+    ],
+    "final_status": "completed"
+  }
+]

@@ -123,8 +123,31 @@ def create_session(body: SessionCreate) -> dict[str, Any]:
     session id and a signed token. The token payload must contain session_id,
     user_id, role, store_id, and issued_at.
     """
-    ### YOUR CODE HERE (HW2)
-    raise NotImplementedError("HW2: implement POST /sessions")
+    if body.role not in ROLES:
+        raise HTTPException(status_code=400, detail=f"unknown role: {body.role!r}")
+
+    with db.connection() as conn:
+        user = db.get_user(conn, body.user_id)
+    if user is None:
+        raise HTTPException(status_code=404, detail="unknown user")
+    if user.role != body.role:
+        raise HTTPException(status_code=403, detail="role does not match the stored role")
+
+    # Every field below comes from the database row, never from the request.
+    ctx = AuthContext(user_id=user.id, role=user.role, store_id=user.store_id)
+    session_id = uuid.uuid4().hex
+    _SESSIONS[session_id] = (ctx, SQLiteSession(session_id, str(SESSIONS_DB)))
+
+    token = create_token(
+        {
+            "session_id": session_id,
+            "user_id": ctx.user_id,
+            "role": ctx.role,
+            "store_id": ctx.store_id,
+            "issued_at": int(time.time()),
+        }
+    )
+    return {"session_id": session_id, "token": token}
 
 
 def _authorize(session_id: str, authorization: str | None) -> AuthContext:
@@ -138,6 +161,19 @@ def _authorize(session_id: str, authorization: str | None) -> AuthContext:
     if session_id not in _SESSIONS:
         raise HTTPException(status_code=404, detail="unknown session (server restarted?)")
     return _SESSIONS[session_id][0]
+
+
+def _trace_content_enabled() -> bool:
+    """Whether message content may be recorded on spans.
+
+    instrument.py defaults this to "false"; Part E turns it on in .env.
+    """
+    return os.environ.get("TRACELOOP_TRACE_CONTENT", "false").strip().lower() == "true"
+
+
+def _genai_messages(role: str, text: str) -> str:
+    """One OTel GenAI message, serialized for a span attribute."""
+    return json.dumps([{"role": role, "parts": [{"type": "text", "content": text}]}])
 
 
 @app.post("/sessions/{session_id}/messages")
@@ -158,8 +194,44 @@ async def post_message(
     gen_ai.output.messages on the root span as JSON arrays of OTel GenAI
     messages with role and parts fields.
     """
-    ### YOUR CODE HERE (HW2)
-    raise NotImplementedError("HW2: implement the traced message endpoint")
+    # Identity comes from the token and the server-side session. Nothing in
+    # the request body is allowed to say who the caller is.
+    ctx = _authorize(session_id, authorization)
+    _, session = _SESSIONS[session_id]
+
+    agent = build_agent(ctx, model=body.model)
+    version = prompt_version(render_system_prompt(ctx))
+    record_content = _trace_content_enabled()
+
+    with _tracer.start_as_current_span("cartwheel.session_message") as span:
+        if span.is_recording():
+            span.set_attribute("cartwheel.user_role", ctx.role)
+            # An id is a label spelled with digits, not a number.
+            span.set_attribute("cartwheel.user_id", str(ctx.user_id))
+            span.set_attribute("cartwheel.prompt_version", version)
+            # Only the scenario runner sets this; manual sessions leave it null.
+            if body.scenario_id:
+                span.set_attribute("cartwheel.scenario_id", body.scenario_id)
+            if record_content:
+                span.set_attribute(
+                    "gen_ai.input.messages", _genai_messages("user", body.message)
+                )
+
+        result = await Runner.run(
+            agent,
+            body.message,
+            session=session,
+            context=ctx,
+            max_turns=MAX_TURNS,
+        )
+        reply = str(result.final_output)
+
+        if span.is_recording() and record_content:
+            span.set_attribute(
+                "gen_ai.output.messages", _genai_messages("assistant", reply)
+            )
+
+    return {"session_id": session_id, "reply": reply, "prompt_version": version}
 
 
 @app.get("/health")

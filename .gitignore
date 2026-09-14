@@ -11,6 +11,10 @@ data/cartwheel.db
 hw1-progress.md
 hw1_capture.py
 hw1-video-script.md
+hw2-progress.md
+hw2-video-script.md
+hw2_capture.py
+hw2_traces.py
 
 # Local conversation state and scenario/replay run outputs.
 .sessions.db

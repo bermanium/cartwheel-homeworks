@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cartwheel trace viewer</title>
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+<header>
+  <h1>Cartwheel trace viewer</h1>
+  <span class="muted">read-only</span>
+  <span class="spacer"></span>
+  <span class="muted" id="scan-status"></span>
+  <button id="reload" type="button">Reload</button>
+</header>
+
+<main>
+  <aside id="left" aria-label="Traces">
+    <div class="filters">
+      <label>
+        <span>Role</span>
+        <select id="f-role"><option value="">All</option></select>
+      </label>
+      <label>
+        <span>Tool</span>
+        <select id="f-tool"><option value="">All</option></select>
+      </label>
+      <label>
+        <span>Status</span>
+        <select id="f-status">
+          <option value="">All</option>
+          <option value="clean">Clean</option>
+          <option value="problems">With problems</option>
+        </select>
+      </label>
+      <label>
+        <span>Prompt version</span>
+        <select id="f-prompt"><option value="">All</option></select>
+      </label>
+      <div class="filters-foot">
+        <span class="count muted" id="f-count"></span>
+        <button id="f-clear" type="button" class="link">Clear</button>
+      </div>
+    </div>
+    <div id="list"><p class="empty">Loading traces&hellip;</p></div>
+  </aside>
+
+  <section id="detail" aria-live="polite">
+    <p class="empty">Select a trace on the left.</p>
+  </section>
+</main>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
