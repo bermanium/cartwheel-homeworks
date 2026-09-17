@@ -32,8 +32,33 @@ class FakeTraceApi:
         return {"id": trace_id, "observations": []}
 
 
+class FakeObservationApi:
+    """The bulk endpoint the export uses instead of one GET per trace.
+
+    Langfuse Cloud rate limits per-trace reads to 15/minute, so the export
+    pages observations once and joins them locally.
+    """
+
+    def __init__(self, observations: list) -> None:
+        self.observations = observations
+
+    def get_many(self, *, page: int, limit: int, **kwargs):
+        start = (page - 1) * limit
+        return SimpleNamespace(data=self.observations[start : start + limit])
+
+
+def _client(trace_api, observations: list) -> SimpleNamespace:
+    return SimpleNamespace(
+        api=SimpleNamespace(trace=trace_api, observations=FakeObservationApi(observations))
+    )
+
+
 def test_export_filters_and_paginates_scenario_traces() -> None:
-    client = SimpleNamespace(api=SimpleNamespace(trace=FakeTraceApi()))
+    # t2's summary carries no scenario id; it is only on one of its spans.
+    client = _client(
+        FakeTraceApi(),
+        [{"traceId": "t2", "metadata": {"cartwheel.scenario_id": "support-2"}}],
+    )
     client.api.trace.summaries[2].metadata = {}
     records = export_scenario_traces({"support-1", "support-2"}, client, page_size=2)
     assert [record["id"] for record in records] == ["t1", "t2"]
@@ -76,7 +101,18 @@ class NestedTraceApi(FakeTraceApi):
 
 
 def test_export_reads_nested_langfuse_attributes() -> None:
-    client = SimpleNamespace(api=SimpleNamespace(trace=NestedTraceApi()))
+    # t4's id is only on a span, stored as a JSON string under metadata.attributes.
+    client = _client(
+        NestedTraceApi(),
+        [
+            {
+                "traceId": "t4",
+                "metadata": {
+                    "attributes": json.dumps({"cartwheel.scenario_id": "support-4"})
+                },
+            }
+        ],
+    )
     records = export_scenario_traces({"support-3", "support-4"}, client, page_size=2)
     assert [record["cartwheel_scenario_id"] for record in records] == [
         "support-3",

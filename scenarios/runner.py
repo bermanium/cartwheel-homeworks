@@ -28,9 +28,11 @@ from __future__ import annotations
 
 import argparse
 import json
+import threading
 import time
 import urllib.error
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 from typing import Any
 
@@ -43,7 +45,10 @@ RESULTS_DIR = REPO_ROOT / "scenarios" / "results"
 # name an explicit user_id instead.
 DEFAULT_USERS = {"shopper": 1, "merchant": 9001, "support": 9501}
 MAX_TURNS_PER_SCENARIO = MAX_SCENARIO_TURNS
-REQUEST_TIMEOUT_S = 180
+# Raised from the shipped 180 s. A single agent turn measured 146 s against the
+# Meta model endpoint, and longer under congestion, so 180 s recorded completed
+# turns as errors while the server returned 200 OK (HW2 saw the same).
+REQUEST_TIMEOUT_S = 900
 
 
 def _post(url: str, payload: dict[str, Any], token: str | None = None) -> dict[str, Any]:
@@ -169,6 +174,18 @@ def main() -> None:
         default=None,
         help="comma separated scenario ids to run; their records replace earlier ones",
     )
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        default=1,
+        help=(
+            "scenarios to play at once. Default 1 keeps the shipped sequential "
+            "behaviour. Higher values are safe only when state-changing "
+            "scenarios target distinct records, since parallel refunds or "
+            "cancellations would otherwise invalidate each other's expected "
+            "outcome."
+        ),
+    )
     args = parser.parse_args()
 
     scenarios = load_scenarios(args.scenarios)
@@ -184,16 +201,34 @@ def main() -> None:
 
     out_path.parent.mkdir(parents=True, exist_ok=True)
     completed = 0
+    done = 0
+    write_lock = threading.Lock()
     with open(out_path, "w") as out:
         for record in kept:
             out.write(json.dumps(record) + "\n")
         out.flush()
-        for i, scenario in enumerate(to_run, start=1):
-            result = run_scenario(scenario, args.base_url, args.model)
-            out.write(json.dumps(result) + "\n")
-            out.flush()
-            completed += result["status"] == "completed"
-            print(f"[{i}/{len(to_run)}] {result['scenario_id']}: {result['status']}")
+
+        def record_result(result: dict[str, Any]) -> None:
+            """Append one result. Locked, because threads share the handle."""
+            nonlocal completed, done
+            with write_lock:
+                out.write(json.dumps(result) + "\n")
+                out.flush()
+                done += 1
+                completed += result["status"] == "completed"
+                print(f"[{done}/{len(to_run)}] {result['scenario_id']}: {result['status']}")
+
+        if args.concurrency > 1:
+            with ThreadPoolExecutor(args.concurrency) as pool:
+                futures = [
+                    pool.submit(run_scenario, scenario, args.base_url, args.model)
+                    for scenario in to_run
+                ]
+                for future in as_completed(futures):
+                    record_result(future.result())
+        else:
+            for scenario in to_run:
+                record_result(run_scenario(scenario, args.base_url, args.model))
     print(f"\n{completed}/{len(to_run)} completed. Results: {out_path}")
     print("Now open Langfuse and run reports/smoke.sql against ClickHouse.")
 

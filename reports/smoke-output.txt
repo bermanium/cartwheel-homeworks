@@ -1,0 +1,140 @@
+   matched 285 traces; fetching observations...
+   (rate limited, sleeping 16s)
+   (rate limited, sleeping 55s)
+   (rate limited, sleeping 52s)
+   attached 2532 observations
+Cartwheel smoke report
+======================================================================
+generated_at   : 2026-09-16T03:05:23.238980+00:00
+scenario prefix: support-
+source         : Langfuse Cloud API (no ClickHouse on Cloud;
+                 reports/smoke.sql ported query for query)
+traces matched : 285
+
+1. Traces per scenario (are scenario ids flowing end to end?)
+-------------------------------------------------------------
+scenario_id   traces
+------------  ------
+support-0156  4
+support-0168  3
+support-0160  3
+support-0074  3
+support-0101  3
+support-0043  3
+support-0045  3
+support-0245  2
+support-0227  2
+support-0173  2
+support-0172  2
+support-0171  2
+support-0169  2
+support-0166  2
+support-0158  2
+support-0115  2
+support-0103  2
+support-0102  2
+support-0099  2
+support-0098  2
+support-0065  2
+support-0093  2
+support-0072  2
+support-0041  2
+support-0046  2
+support-0044  2
+support-0042  2
+support-0250  1
+support-0249  1
+support-0248  1
+support-0247  1
+support-0246  1
+support-0244  1
+support-0243  1
+support-0242  1
+support-0241  1
+support-0240  1
+support-0239  1
+support-0238  1
+support-0237  1
+support-0236  1
+support-0235  1
+support-0234  1
+support-0233  1
+support-0232  1
+support-0231  1
+support-0230  1
+support-0229  1
+support-0228  1
+support-0226  1
+
+   distinct scenario ids with a trace: 250
+   scenario ids with more than one trace: 27  (a rerun and a multi-turn conversation both add traces)
+
+2. Traces per user role (are all three roles represented?)
+----------------------------------------------------------
+role      traces
+--------  ------
+shopper   229
+merchant  29
+support   27
+
+3. Error count by observation name (anything raising?)
+------------------------------------------------------
+name                       errors
+-------------------------  ------
+search_products            90
+cartwheel-support.agent    27
+cartwheel.session_message  27
+openai.response            26
+
+4. Escalation count
+-------------------
+escalations
+-----------
+38
+
+5. Token and cost totals
+------------------------
+input_tokens  output_tokens  total_cost
+------------  -------------  ----------
+0             0              0.0
+
+   NOTE: zero is the observed value, not a porting bug. A direct
+   /chat/completions call to the Meta endpoint returns a populated
+   usage block, but the counts do not survive into the Langfuse
+   spans, so no GENERATION observation carries usage.
+
+6. Longest traces by span count (candidates for a raw read)
+-----------------------------------------------------------
+trace_id                          spans  duration_ms
+--------------------------------  -----  -----------
+e5354c5313a182f3262d36f35ea9d2f4  27     572760
+d013e07060fa8cf9d95de9bc06735255  24     458703
+b0ca54d3557631be34a39f728dce9365  24     525012
+c05c4fc9932671ed68a1ca322b5305f3  18     176662
+3d49951afb6adc2c8169e2230f0ddca7  18     209252
+adf9b7712298634ac98ce53321b50e31  17     203223
+ceafa759cee661400b3fd8a6115ac1b4  16     130270
+e328f619d2bb6bd68511c3edf9a10da0  16     369384
+84923c54faafb18561417f863030ebba  16     227902
+69f190185845efe206721c0123ec4330  16     291066
+
+7. Tool-call frequency (which tools does the agent actually use?)
+-----------------------------------------------------------------
+name                      calls
+------------------------  -----
+search_products           162
+find_order                139
+get_order                 110
+get_policy                82
+search_help_center        74
+check_return_eligibility  68
+escalate_to_human         38
+list_my_orders            17
+issue_refund              8
+cancel_order              6
+
+8. Permission-denied count
+--------------------------
+permission_denials
+------------------
+5

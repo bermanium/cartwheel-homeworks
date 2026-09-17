@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import time
 from datetime import date, datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -30,6 +31,8 @@ def _jsonable(value: Any) -> Any:
         return json.loads(value.json(by_alias=True))
     if hasattr(value, "dict"):
         return value.dict(by_alias=True)
+    if hasattr(value, "__dict__") and not isinstance(value, type):
+        return dict(vars(value))
     return value
 
 
@@ -79,28 +82,79 @@ def _scenario_id(record: Any) -> str | None:
     return None
 
 
+def _retrying(call: Any, *args: Any, **kwargs: Any) -> Any:
+    """Call the API, honouring Langfuse Cloud's 429 retryAfterSeconds."""
+    for _ in range(8):
+        try:
+            return call(*args, **kwargs)
+        except Exception as exc:  # ApiError carries the hint in its body
+            if getattr(exc, "status_code", None) != 429:
+                raise
+            body = getattr(exc, "body", None)
+            wait = 30
+            if isinstance(body, dict):
+                wait = (body.get("details") or {}).get("retryAfterSeconds", 30)
+            print(f"  rate limited, waiting {wait}s", flush=True)
+            time.sleep(float(wait) + 1)
+    raise RuntimeError("rate limited repeatedly by the Langfuse API")
+
+
 def export_scenario_traces(
     scenario_ids: set[str], client: Any, *, page_size: int = 100
 ) -> list[dict[str, Any]]:
-    """Fetch full trace records whose metadata carries a selected scenario id."""
-    matches: list[dict[str, Any]] = []
+    """Fetch trace records whose metadata carries a selected scenario id.
+
+    Assembled from two paged endpoints rather than one GET per trace.
+    Langfuse Cloud rate limits ``GET /api/public/traces/{traceId}`` to 15
+    requests per minute, so fetching a 250-scenario run one trace at a time
+    fails with 429 well before it finishes.
+
+    Traces are collected first and filtered last, because the scenario id is
+    not always on the trace summary: when it is only set on a child span, the
+    id has to be read from the observations.
+    """
+    traces: dict[str, dict[str, Any]] = {}
     page = 1
     while True:
-        response = client.api.trace.list(page=page, limit=page_size)
+        response = _retrying(client.api.trace.list, page=page, limit=page_size)
         batch = list(response.data or [])
         for trace_summary in batch:
-            scenario_id = _attribute_scenario_id(getattr(trace_summary, "metadata", None))
-            full = client.api.trace.get(getattr(trace_summary, "id"))
-            record = _jsonable(full)
-            scenario_id = scenario_id or _scenario_id(record)
-            if scenario_id not in scenario_ids:
+            record = _jsonable(trace_summary)
+            if not isinstance(record, dict) or "id" not in record:
                 continue
-            if isinstance(record, dict):
-                record.setdefault("cartwheel_scenario_id", scenario_id)
-            matches.append(record)
+            # trace.list returns `observations` as a list of ids; replace it
+            # with the full span objects fetched below, keeping the ids so the
+            # export still records what the summary claimed.
+            record["observation_ids"] = record.get("observations") or []
+            record["observations"] = []
+            record["_summary_scenario_id"] = _attribute_scenario_id(
+                getattr(trace_summary, "metadata", None)
+            )
+            traces[record["id"]] = record
         if len(batch) < page_size:
             break
         page += 1
+
+    page = 1
+    while True:
+        response = _retrying(client.api.observations.get_many, page=page, limit=page_size)
+        batch = list(response.data or [])
+        for observation in batch:
+            record = _jsonable(observation)
+            trace = traces.get(record.get("traceId"))
+            if trace is not None:
+                trace["observations"].append(record)
+        if len(batch) < page_size:
+            break
+        page += 1
+
+    matches: list[dict[str, Any]] = []
+    for record in traces.values():
+        scenario_id = record.pop("_summary_scenario_id", None) or _scenario_id(record)
+        if scenario_id not in scenario_ids:
+            continue
+        record.setdefault("cartwheel_scenario_id", scenario_id)
+        matches.append(record)
     return matches
 
 

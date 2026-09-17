@@ -15,6 +15,11 @@ hw2-progress.md
 hw2-video-script.md
 hw2_capture.py
 hw2_traces.py
+hw3-progress.md
+hw3-video-script.md
+hw3_generate.py
+hw3_smoke_report.py
+hw4_prepare_review.py
 
 # Local conversation state and scenario/replay run outputs.
 .sessions.db
@@ -28,3 +33,8 @@ __pycache__/
 .venv/
 .pytest_cache/
 scenarios/demo_pilot_gt.json
+scenarios/.*_conversations.jsonl
+
+# Review-app working state (regenerate with hw4_prepare_review.py).
+analysis/state/samples.json
+analysis/state/sample_manifest.json
