@@ -1,1 +1,18 @@
-{"annotations": []}
+[
+  {
+    "id": "a1789666433529181",
+    "trace_id": "5071ba7645962a515703198df17c7f92",
+    "quote": "I also checked about returns for you \u2014 our return window is 30 days from the delivery date [cw-returns], and since this was delivered back in March, that window has now closed and it's showing as not eligible for a refund.",
+    "idx": 9,
+    "note": "The customer did not ask for a refund, there is not reason to answer this",
+    "ts": "2026-09-17T17:33:53.530Z"
+  },
+  {
+    "id": "a1789666477570482",
+    "trace_id": "03d51b44a1218ce7bc361eaaf67bf735",
+    "quote": "I know that's disappointing especially since you never really opened it. If you'd like, I can escalate this to a human to ask Harbor Knits if they'd make a one-time exception \u2014 I can't promise anything, but I'm happy to do that for you.",
+    "idx": 7,
+    "note": "No reason to offer this unless they ask",
+    "ts": "2026-09-17T17:34:37.570Z"
+  }
+]
