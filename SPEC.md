@@ -60,6 +60,17 @@ outside the caller's role. Authorization is not a prompt.
 
 The threshold is `refund_auto_approve_threshold_usd` in `facts.yaml` ($100).
 
+**AUTH-2.** The model is told what the caller's role permits, not only the role
+name. Enforcement stays in the tool layer under AUTH-1, but the agent must not
+refuse an action on its own authority when the tool layer would allow it. Where
+the agent is unsure, it attempts the call and reports the result rather than
+declining in advance.
+
+AUTH-1 states that authorization is not a prompt, which is correct for
+enforcement. AUTH-2 covers the other direction: a model that does not know what
+its caller may do over-refuses, and an over-refusal is invisible to the tool
+layer because no call is ever made.
+
 ## 4. Tools
 
 Successful results contain `ok: true` and the result fields. Expected failures contain `ok: false`, an `error` code, and a human-readable `reason`. Unexpected execution failures raise exceptions.
@@ -90,6 +101,19 @@ Successful results contain `ok: true` and the result fields. Expected failures c
 | `cancel_order` | `order_id` and `status: cancelled` after updating an authorized order whose current status is `placed`. | `not_found` for an unknown order; `permission_denied` for an unauthorized caller; `not_eligible` when the order is no longer `placed`; `paused` when cancellations are disabled. |
 | `escalate_to_human` | `ticket_id` and `sla_hours` after creating the support ticket. | Execution exception if ticket creation fails. |
 
+### Requirements on the tool set
+
+These constrain the tools themselves rather than the model's use of them. A
+prompt change cannot satisfy either one.
+
+**TOOL-10.** A single tool answers a single question. Where two tools return
+overlapping records, each returns the complete record for its scope, so the
+agent never has to call both to assemble one answer.
+
+**TOOL-11.** Every optional tool parameter accepts omission. A tool rejects a
+request only for a value it cannot act on, never for the absence of an optional
+one.
+
 ## 5. Escalation policy
 
 The following cases always go to a human:
@@ -99,6 +123,11 @@ The following cases always go to a human:
 - **ESC-3.** Disputes and requests the agent cannot resolve from the help center and the
   order record.
 - **ESC-4.** Any case where the agent is unsure whether policy allows an action.
+- **ESC-5.** A return or refund whose order total is at or above the threshold
+  goes to a human before the agent states or implies that it can complete the
+  request itself. The agent may confirm eligibility and cite the applicable
+  policy first. ESC-1 governs the refund tool once a refund is attempted;
+  ESC-5 governs what the agent may promise before that point.
 
 ## 6. Other response requirements
 
@@ -109,3 +138,32 @@ Requirements that do not fit in the sections above, including tone and style gui
 - **RESP-3.** State when required information is missing or inconsistent, rather than inventing a value.
 - **RESP-4.** Explain refusals and escalations without revealing inaccessible order or user information.
 - **RESP-5.** Use direct and respectful language that explains the relevant decision.
+- **RESP-6.** Answer the question the user asked. Do not add information the
+  request did not call for, and do not offer an action the user did not
+  request. Offering escalation is permitted only where section 5 requires it.
+  This does not license a bare refusal: a negative answer still states its
+  reason, as RESP-4 and RESP-5 require.
+- **RESP-7.** Build a tool query from the concrete identifiers the user supplied
+  (order number, product name, store), not from qualitative descriptions or
+  from values the user may be misremembering. Before telling the user a record
+  cannot be found, try the other lookups the tool set provides.
+
+## 7. Revision history
+
+Requirements added after the Module 2 error analysis. Each records the human
+annotation that motivated it, so the path from an observed trace to a stated
+requirement stays inspectable. Reviewed sample: 105 traces, 140 annotations.
+
+| Requirement | Motivating annotation | Trace | The observation |
+| --- | --- | --- | --- |
+| RESP-6 | `a1789666433529181` | `support-0227` | "The customer did not ask for a refund, there is no reason to answer this." 29 annotations across 28 traces describe the agent volunteering content or offers. |
+| ESC-5 | `a1789766457332` | `support-0001` | "should be escalating to human because it's over $100." Five annotations, all on returns above the threshold where the agent implied it could complete the request. |
+| TOOL-10 | `a1789759653422` | `support-0230` | "find_order and get_order are the same thing, but neither has complete data." 21 annotations describe one answer requiring two overlapping calls. |
+| RESP-7 | `a1789755880533` | `support-0045` | "Searching by price is probably not a reliable way to find a user's order. They may misremember." |
+| TOOL-11 | Part C span analysis | `53c316f5ceec4910f64b1337801bd543` | `search_products` fails on 129 of 162 calls store-wide (80%). The model emits the string `"null"` for optional parameters because it has no way to omit them, and the schema rejects it. |
+| AUTH-2 | `a1789765387826` | `support-0072` | "this is a support person who has access to orders, this is an incorrect denial." Across two runs of this scenario the agent refused after `find_order` returned the record with `ok: true`, and refused again without attempting any lookup. The refusal does not depend on what the tool layer answers. |
+
+Two of these are code requirements, not prompt requirements. **TOOL-10 and
+TOOL-11 cannot be satisfied by any prompt change**, and an LLM judge is the
+wrong evaluator for a mode derived from them. They belong in Module 3 as
+regression checks against corrected tools.

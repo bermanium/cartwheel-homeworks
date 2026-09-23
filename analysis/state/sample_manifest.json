@@ -1,0 +1,650 @@
+[
+  {
+    "trace_id": "5071ba7645962a515703198df17c7f92",
+    "reason": "cluster 0 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0227"
+  },
+  {
+    "trace_id": "03d51b44a1218ce7bc361eaaf67bf735",
+    "reason": "cluster 1 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0203"
+  },
+  {
+    "trace_id": "eda60e30e890ffd43942a0e4a68966ec",
+    "reason": "cluster 2 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0171"
+  },
+  {
+    "trace_id": "1a3b84414bb341247e62ea086bdf62b5",
+    "reason": "cluster 3 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0212"
+  },
+  {
+    "trace_id": "ccd03806983e74fbc843c260a975d99c",
+    "reason": "cluster 4 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0195"
+  },
+  {
+    "trace_id": "d013e07060fa8cf9d95de9bc06735255",
+    "reason": "cluster 5 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0043"
+  },
+  {
+    "trace_id": "19c8024050da7fb1e85de3a0705c5048",
+    "reason": "cluster 6 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0168"
+  },
+  {
+    "trace_id": "d6a5017cb8f56de62336e6673889e8e7",
+    "reason": "cluster 7 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0158"
+  },
+  {
+    "trace_id": "fc47c2dece9d92b298232b10fc3a5442",
+    "reason": "cluster 8 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0074"
+  },
+  {
+    "trace_id": "cb4a87af7879e85b929862960acca841",
+    "reason": "cluster 9 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0156"
+  },
+  {
+    "trace_id": "c05c4fc9932671ed68a1ca322b5305f3",
+    "reason": "cluster 0 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0230"
+  },
+  {
+    "trace_id": "7c4889352c09c1ff65b78533e973a60d",
+    "reason": "cluster 1 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0202"
+  },
+  {
+    "trace_id": "625cd47042bdffb68304aea90ed3918b",
+    "reason": "cluster 2 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0243"
+  },
+  {
+    "trace_id": "3f4a7c525e07c9d8a3ffda5c334b3c68",
+    "reason": "cluster 3 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0152"
+  },
+  {
+    "trace_id": "809e67898f1bf44b372582dbed0d7f6d",
+    "reason": "cluster 4 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0191"
+  },
+  {
+    "trace_id": "69f190185845efe206721c0123ec4330",
+    "reason": "cluster 5 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0045"
+  },
+  {
+    "trace_id": "3730e3bd8f3f45ba16fe37607bb2fa98",
+    "reason": "cluster 6 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0173"
+  },
+  {
+    "trace_id": "ccd6c6a8c62c4d6ca9ddf0c983e20010",
+    "reason": "cluster 7 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0115"
+  },
+  {
+    "trace_id": "88e4b2847fcb1c443d1e59a9bcdee3e2",
+    "reason": "cluster 8 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0157"
+  },
+  {
+    "trace_id": "6b2c5c0b2272c43b23a01bdc33fb4838",
+    "reason": "cluster 9 representative",
+    "strategy": "diversity",
+    "scenario_id": "support-0160"
+  },
+  {
+    "trace_id": "208efc4c24d308bae10dd8bf49d7f7b5",
+    "reason": "random pick",
+    "strategy": "diversity",
+    "scenario_id": "support-0209"
+  },
+  {
+    "trace_id": "999f83c510042d97665b175bb09d6676",
+    "reason": "random pick",
+    "strategy": "diversity",
+    "scenario_id": "support-0007"
+  },
+  {
+    "trace_id": "484960e70fad3d22ea92badf724db9f2",
+    "reason": "random pick",
+    "strategy": "diversity",
+    "scenario_id": "support-0049"
+  },
+  {
+    "trace_id": "e20f84cfba17fd89f0ffcabd0ecab114",
+    "reason": "random pick",
+    "strategy": "diversity",
+    "scenario_id": "support-0188"
+  },
+  {
+    "trace_id": "1898d4a2615eb6a0c713a9ac190c64b5",
+    "reason": "random pick",
+    "strategy": "diversity",
+    "scenario_id": "support-0039"
+  },
+  {
+    "trace_id": "578ed4113f514ca21651313405d761bf",
+    "reason": "random pick",
+    "strategy": "diversity",
+    "scenario_id": "support-0219"
+  },
+  {
+    "trace_id": "f2e272580bf946bda910ea3638a860b4",
+    "reason": "random pick",
+    "strategy": "diversity",
+    "scenario_id": "support-0147"
+  },
+  {
+    "trace_id": "a81ddad79e5a0c2390bbe82312f458e2",
+    "reason": "random pick",
+    "strategy": "diversity",
+    "scenario_id": "support-0052"
+  },
+  {
+    "trace_id": "b87c13f821fd96378a0061ed567fca22",
+    "reason": "random pick",
+    "strategy": "diversity",
+    "scenario_id": "support-0250"
+  },
+  {
+    "trace_id": "86eda8479ef8993d56990bb385977935",
+    "reason": "random pick",
+    "strategy": "diversity",
+    "scenario_id": "support-0050"
+  },
+  {
+    "trace_id": "94aae55d3a2ec86070a8d324f2b205d2",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0149"
+  },
+  {
+    "trace_id": "cd5a26ef5604620c2fee9817e2bee636",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0210"
+  },
+  {
+    "trace_id": "4d3d10d8f90a8d6d31303a99753fb77a",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0129"
+  },
+  {
+    "trace_id": "778c466db0302d46b54fa6e67b52ffa3",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0061"
+  },
+  {
+    "trace_id": "028845555f2c7d9759119414fc2c16a1",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0240"
+  },
+  {
+    "trace_id": "7ff864f9ae9a3e81bd08bd81f2930aba",
+    "reason": "intent=return_refund",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0199"
+  },
+  {
+    "trace_id": "323f9816d08ae0b9574e7f1e4249bf1d",
+    "reason": "intent=return_refund",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0019"
+  },
+  {
+    "trace_id": "adf9b7712298634ac98ce53321b50e31",
+    "reason": "intent=return_refund",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0030"
+  },
+  {
+    "trace_id": "12a964b61102adcd5b3b4d2cc1f85a2f",
+    "reason": "intent=return_refund",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0034"
+  },
+  {
+    "trace_id": "1e1b9ecd1493a3d7ec0d8740d181dc97",
+    "reason": "intent=order_status",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0236"
+  },
+  {
+    "trace_id": "d18e0bf458d237e5f95aefb8037252c7",
+    "reason": "intent=order_status",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0085"
+  },
+  {
+    "trace_id": "2214424b5e8309dc414c3f93adba013d",
+    "reason": "intent=order_status",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0234"
+  },
+  {
+    "trace_id": "774bb0e9dac00fa7afbbac63ff4f6c5d",
+    "reason": "intent=order_status",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0239"
+  },
+  {
+    "trace_id": "84f39e447fd09e2c6afb1e25f51e038d",
+    "reason": "intent=policy_question",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0148"
+  },
+  {
+    "trace_id": "02fddd6dc2998f87c1dfbed01882994f",
+    "reason": "intent=policy_question",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0127"
+  },
+  {
+    "trace_id": "f52a6d8124c1535678c4391d7b570097",
+    "reason": "intent=policy_question",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0122"
+  },
+  {
+    "trace_id": "6c27583ca49f3c33b095b0f5b8a14f7d",
+    "reason": "intent=policy_question",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0130"
+  },
+  {
+    "trace_id": "5909e10b69e6279387a00242fa5eb127",
+    "reason": "intent=product_search",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0169"
+  },
+  {
+    "trace_id": "2936da42687e5e3b3bdb1c3c08e5fe0a",
+    "reason": "intent=product_search",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0092"
+  },
+  {
+    "trace_id": "316d1046ea182b140a6bfd729ffae024",
+    "reason": "intent=product_search",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0099"
+  },
+  {
+    "trace_id": "960dabde0ba43272aa0ac2d412cba1b5",
+    "reason": "intent=product_search",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0103"
+  },
+  {
+    "trace_id": "7c256b3347a64326e37e06ca6a3e2a89",
+    "reason": "intent=dispute",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0073"
+  },
+  {
+    "trace_id": "236a5528a8c299b5bc820e891363f253",
+    "reason": "intent=dispute",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0062"
+  },
+  {
+    "trace_id": "5ccfc003a1415c35dc441bae7eed98b9",
+    "reason": "intent=dispute",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0072"
+  },
+  {
+    "trace_id": "e4bf16171bf348718da6f24acd1f7f50",
+    "reason": "intent=dispute",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0076"
+  },
+  {
+    "trace_id": "adef269b6ec62220a36b50f2e9745bab",
+    "reason": "intent=out_of_scope",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0107"
+  },
+  {
+    "trace_id": "8e1f12708217b10591bc5e33fd47229c",
+    "reason": "intent=out_of_scope",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0114"
+  },
+  {
+    "trace_id": "222e489a8d005d307eba89cda743a886",
+    "reason": "intent=out_of_scope",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0112"
+  },
+  {
+    "trace_id": "bcba28b71b0106aaee9a08430097a958",
+    "reason": "intent=out_of_scope",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0111"
+  },
+  {
+    "trace_id": "4cec26e115a0675ce122d891c28df39e",
+    "reason": "intent=cancellation",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0040"
+  },
+  {
+    "trace_id": "53e970e385c2effe7f6fdb376dcf5440",
+    "reason": "intent=cancellation",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0037"
+  },
+  {
+    "trace_id": "3458481d8ceebb535df429f556821641",
+    "reason": "intent=cancellation",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0024"
+  },
+  {
+    "trace_id": "c8d01704b1d6bff65737205cc0cdae8a",
+    "reason": "intent=account_change",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0057"
+  },
+  {
+    "trace_id": "0ffbd8b140ebf13509822a2d81e5fbbe",
+    "reason": "intent=account_change",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0056"
+  },
+  {
+    "trace_id": "2de95d252848afc1ab47d6d3612bff29",
+    "reason": "intent=account_change",
+    "strategy": "dimension:intent",
+    "scenario_id": "support-0054"
+  },
+  {
+    "trace_id": "5511619144be3c08892164136c0e0d3f",
+    "reason": "store override (store_override_looser) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0001"
+  },
+  {
+    "trace_id": "58c42516091890300aa522f671f4706c",
+    "reason": "store override (store_override_looser) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0002"
+  },
+  {
+    "trace_id": "7aebb121eb60d8195bb0daa4280340ad",
+    "reason": "store override (store_override_looser) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0003"
+  },
+  {
+    "trace_id": "a652b27a7ff4cc89742ad575089b2828",
+    "reason": "store override (store_override_looser) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0004"
+  },
+  {
+    "trace_id": "1d60d3b188a04d87801bf60c932d36ba",
+    "reason": "store override (store_override_looser) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0005"
+  },
+  {
+    "trace_id": "f544c1608838c4edce731650e8fb0963",
+    "reason": "store override (store_override_looser) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0006"
+  },
+  {
+    "trace_id": "57cae06cbfbab4128732668e4895c88b",
+    "reason": "store override (store_override_stricter) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0008"
+  },
+  {
+    "trace_id": "1ea9b848e65f1c7f75b6e935b453e311",
+    "reason": "store override (store_override_stricter) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0009"
+  },
+  {
+    "trace_id": "22615bb0f38ec5116707b20ed724cc9c",
+    "reason": "store override (store_override_stricter) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0010"
+  },
+  {
+    "trace_id": "87db100d0df60dd630fd82f2b9853b58",
+    "reason": "store override (store_override_stricter) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0011"
+  },
+  {
+    "trace_id": "9cb0ba06e9b5d3d665b111831be87ec6",
+    "reason": "store override (store_override_stricter) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0012"
+  },
+  {
+    "trace_id": "9b405a96852f00ab8c5073e81412b46e",
+    "reason": "store override (store_override_stricter) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0020"
+  },
+  {
+    "trace_id": "b0ca54d3557631be34a39f728dce9365",
+    "reason": "store override (store_override_stricter) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0041"
+  },
+  {
+    "trace_id": "dd397a860a03a131b486ebd1f22e005c",
+    "reason": "store override (store_override_stricter) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0177"
+  },
+  {
+    "trace_id": "c945231047d68b40f1bc6f8b805bef78",
+    "reason": "store override (store_override_stricter) not mentioned in reply",
+    "strategy": "depth:missing_store_policy_check",
+    "scenario_id": "support-0178"
+  },
+  {
+    "trace_id": "0966cc2aa2c1f2c6309bca499e6e7efe",
+    "reason": "merchant reply contains refusal language",
+    "strategy": "depth:unauthorized_refusal",
+    "scenario_id": "support-0048"
+  },
+  {
+    "trace_id": "222a751ad02e569d72c6229431612522",
+    "reason": "support reply contains refusal language",
+    "strategy": "depth:unauthorized_refusal",
+    "scenario_id": "support-0075"
+  },
+  {
+    "trace_id": "98be3351c284135c9b7c339ac77d1c26",
+    "reason": "merchant reply contains refusal language",
+    "strategy": "depth:unauthorized_refusal",
+    "scenario_id": "support-0137"
+  },
+  {
+    "trace_id": "705761e6cd7fbc63319bf16eff4de7c6",
+    "reason": "support reply contains refusal language",
+    "strategy": "depth:unauthorized_refusal",
+    "scenario_id": "support-0247"
+  },
+  {
+    "trace_id": "626c97dd3965b20e317dec18b081c7f4",
+    "reason": "tool returned permission_denied (authorization worked)",
+    "strategy": "depth:unauthorized_refusal",
+    "scenario_id": "support-0047"
+  },
+  {
+    "trace_id": "4fc731dcf97435a37ba4b6a374871144",
+    "reason": "account_change: ESC-2 requires escalation",
+    "strategy": "depth:unsolicited_content",
+    "scenario_id": "support-0053"
+  },
+  {
+    "trace_id": "3a7f1b81300e649e1cf85713ce3fdd36",
+    "reason": "account_change: ESC-2 requires escalation",
+    "strategy": "depth:unsolicited_content",
+    "scenario_id": "support-0055"
+  },
+  {
+    "trace_id": "b2cabcbb0206f051a512e72f8f03e912",
+    "reason": "account_change: ESC-2 requires escalation",
+    "strategy": "depth:unsolicited_content",
+    "scenario_id": "support-0058"
+  },
+  {
+    "trace_id": "cc92e2d789af7a63037e79172c382106",
+    "reason": "account_change: ESC-2 requires escalation",
+    "strategy": "depth:unsolicited_content",
+    "scenario_id": "support-0059"
+  },
+  {
+    "trace_id": "75b1a6a32bef9bf924235091f98a3224",
+    "reason": "account_change: ESC-2 requires escalation",
+    "strategy": "depth:unsolicited_content",
+    "scenario_id": "support-0060"
+  },
+  {
+    "trace_id": "0779c571f286ef3079b171e1507250a4",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0135"
+  },
+  {
+    "trace_id": "276102bf25dbb3d50fa348e34628fa1f",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0200"
+  },
+  {
+    "trace_id": "614e05edca810b9e0fa2234ca102adb5",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0108"
+  },
+  {
+    "trace_id": "b766b71e6a403e1086c9c97acea3ba42",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0235"
+  },
+  {
+    "trace_id": "21f66675f654995ac1dc08898a6a42bc",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0226"
+  },
+  {
+    "trace_id": "574974df03061819b4efa61f88a36d8d",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0046"
+  },
+  {
+    "trace_id": "7e6877953c66e813a7a496d0f9160783",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0220"
+  },
+  {
+    "trace_id": "ff89cdb4ee6db52ddda8cdbdf7638b90",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0120"
+  },
+  {
+    "trace_id": "f0d7501122bc5e07d50f1fa7dbbb2e61",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0026"
+  },
+  {
+    "trace_id": "7d947bc918fbb19ce6ec728964d056ac",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0232"
+  },
+  {
+    "trace_id": "3d49951afb6adc2c8169e2230f0ddca7",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0070"
+  },
+  {
+    "trace_id": "f5aa92aadb494fc719f820176dd1d272",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0180"
+  },
+  {
+    "trace_id": "75005b769ca3344f648fb6cb3e6d4c9f",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0241"
+  },
+  {
+    "trace_id": "5b1929c2d4bb559b5cf2e62f5d423c52",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0222"
+  },
+  {
+    "trace_id": "96df836ec4c45c7941695fb0daa632d4",
+    "reason": "random pick",
+    "strategy": "random",
+    "scenario_id": "support-0096"
+  },
+  {
+    "trace_id": "24a8659952996b4ebf114fbaed2e91ed",
+    "reason": "depth: return/refund $230.75 above threshold, no escalation",
+    "strategy": "depth:missing_threshold_escalation",
+    "scenario_id": "support-0044"
+  },
+  {
+    "trace_id": "20d50c99faa2ecc5f0498764368c3f5b",
+    "reason": "depth: return/refund $121.00 above threshold, no escalation",
+    "strategy": "depth:missing_threshold_escalation",
+    "scenario_id": "support-0031"
+  },
+  {
+    "trace_id": "0b845c104246b1377e9dd481c4043fd9",
+    "reason": "depth: return/refund $242.00 above threshold, no escalation",
+    "strategy": "depth:missing_threshold_escalation",
+    "scenario_id": "support-0017"
+  }
+]

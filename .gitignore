@@ -20,6 +20,8 @@ hw3-video-script.md
 hw3_generate.py
 hw3_smoke_report.py
 hw4_prepare_review.py
+hw4-progress.md
+hw4-video-script.md
 
 # Local conversation state and scenario/replay run outputs.
 .sessions.db
@@ -35,6 +37,8 @@ __pycache__/
 scenarios/demo_pilot_gt.json
 scenarios/.*_conversations.jsonl
 
-# Review-app working state (regenerate with hw4_prepare_review.py).
-analysis/state/samples.json
-analysis/state/sample_manifest.json
+# Review-app working state. samples.json and sample_manifest.json are now
+# committed: the handout requires the manifest, and committing the samples
+# alongside it makes the review app runnable from a fresh clone (the trace
+# export it derives from is already tracked and larger).
+analysis/state/.langfuse_sync.json

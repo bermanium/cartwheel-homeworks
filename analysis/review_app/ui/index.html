@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Cartwheel trace review</title>
+<style>
+/* Visual encoding (SKILL.md phase 2). One channel, one meaning:
+   - colour hue      = message role, the primary categorical distinction
+   - opacity         = whether the content must be read (system prompt only)
+   - spacing         = hierarchy: within a step, between steps, between turns
+   - typography      = content type: prose proportional, payloads monospace
+   - container       = grouping: reasoning + call + result share one box     */
+:root{
+  --user:#2563eb; --agent:#0f766e; --call:#b45309; --result:#475569;
+  --retrieval:#7c3aed; --reply:#15803d; --write:#be123c;
+  --ink:#111827; --muted:#6b7280; --line:#e5e7eb; --bg:#f8fafc;
+  --mark:#fde68a; --mark-hi:#fbbf24; --sugg:#c4b5fd;
+}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+     color:var(--ink);background:var(--bg)}
+code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px}
+
+/* ---- top bar ---- */
+#bar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:14px;
+     padding:9px 16px;background:#fff;border-bottom:1px solid var(--line)}
+#bar h1{font-size:14px;margin:0;font-weight:650;letter-spacing:-.01em}
+.tab{border:1px solid var(--line);background:#fff;border-radius:6px;padding:4px 11px;
+     cursor:pointer;font:inherit;font-size:13px}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+#nav{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:13px}
+#nav button{border:1px solid var(--line);background:#fff;border-radius:6px;
+            padding:4px 9px;cursor:pointer;font:inherit}
+#nav button:disabled{opacity:.35;cursor:default}
+#counter{color:var(--muted);min-width:96px;text-align:center}
+#toast{position:fixed;right:16px;bottom:16px;z-index:99;background:var(--ink);color:#fff;
+       padding:9px 14px;border-radius:7px;font-size:13px;opacity:0;transition:opacity .2s;
+       pointer-events:none;max-width:380px}
+#toast.show{opacity:1}
+
+.view{display:none;padding:18px 16px 120px}
+.view.on{display:block}
+
+/* ---- trace view: two columns, body + margin notes ---- */
+#tracewrap{display:flex;gap:22px;align-items:flex-start;max-width:1180px;margin:0 auto}
+#body{flex:1;max-width:760px}
+#margin{width:250px;position:relative;flex:none}
+
+#head{background:#fff;border:1px solid var(--line);border-radius:9px;padding:12px 14px;
+      margin-bottom:8px}
+#head .idline{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline}
+#head .sid{font-weight:650;font-size:15px}
+.pill{font-size:11.5px;padding:1.5px 7px;border-radius:99px;background:#f1f5f9;
+      color:#334155;border:1px solid var(--line)}
+.pill.flag{background:#fef3c7;border-color:#fcd34d;color:#78350f}
+.pill.why{background:#eef2ff;border-color:#c7d2fe;color:#3730a3}
+#head .tid{font-size:11.5px;color:var(--muted);margin-top:5px}
+
+/* system prompt: identical across all 346 traces on this prompt version, so it
+   is the one thing the skill says to mute. Collapsed, never deleted. */
+details.sys{margin-bottom:16px;opacity:.5}
+details.sys summary{cursor:pointer;font-size:12.5px;color:var(--muted);
+                    padding:5px 0;user-select:none}
+details.sys[open]{opacity:.8}
+details.sys pre{white-space:pre-wrap;background:#fff;border:1px solid var(--line);
+                border-radius:7px;padding:11px;margin:5px 0 0;max-height:320px;overflow:auto}
+
+.turnsep{display:flex;align-items:center;gap:9px;margin:34px 0 14px;
+         font-size:11.5px;font-weight:650;letter-spacing:.07em;color:var(--muted)}
+.turnsep::after{content:"";flex:1;height:1px;background:var(--line)}
+.turnsep:first-child{margin-top:0}
+
+.block{border-left:3px solid var(--line);padding:9px 0 9px 12px;background:#fff;
+       border-radius:0 7px 7px 0;margin-bottom:6px}
+.role{font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+      margin-bottom:4px}
+.txt{white-space:pre-wrap;word-wrap:break-word}
+
+.block.user{border-left-color:var(--user)}       .block.user .role{color:var(--user)}
+.block.agent{border-left-color:var(--agent)}     .block.agent .role{color:var(--agent)}
+.block.reply{border-left-color:var(--reply);border:1px solid #bbf7d0;
+             border-left-width:3px;padding:12px;margin-top:18px}
+.block.reply .role{color:var(--reply)}
+
+/* one step = reasoning + call + result in a shared container (common region) */
+.step{border:1px solid var(--line);border-radius:9px;background:#fff;padding:4px 12px 10px;
+      margin:0 0 14px}
+.step.write{border-color:#fecdd3;box-shadow:0 0 0 2px #fff1f2}
+.stepno{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.06em;
+        padding:7px 0 2px}
+.step .block{border-radius:0;margin-bottom:2px;padding-top:5px;padding-bottom:5px}
+.call{border-left:3px solid var(--call);padding:7px 0 7px 12px;margin-top:4px}
+.call .role{color:var(--call)}
+.call .args{color:#7c2d12}
+.res{border-left:3px solid var(--result);padding:7px 0 7px 12px;margin-top:2px;
+     background:#f8fafc;border-radius:0 7px 7px 0}
+.res .role{color:var(--result)}
+.res.retrieval{border-left-color:var(--retrieval)} .res.retrieval .role{color:var(--retrieval)}
+.res.bad{border-left-color:#dc2626} .res.bad .role{color:#dc2626}
+.summary{font-size:12.5px;color:#334155;margin-bottom:3px}
+.badge{font-size:10.5px;padding:1px 6px;border-radius:4px;margin-left:6px;font-weight:650}
+.badge.ok{background:#dcfce7;color:#166534}
+.badge.fail{background:#fee2e2;color:#991b1b}
+.badge.w{background:#ffe4e6;color:#9f1239}
+/* Tool output is 275 chars at the median, so inline is the default and only
+   genuine outliers collapse. Collapsing everything would hide the evidence. */
+pre.payload{white-space:pre-wrap;word-break:break-word;margin:3px 0 0;max-height:none}
+details.big summary{cursor:pointer;color:var(--muted);font-size:12px}
+table.ret{border-collapse:collapse;width:100%;margin-top:4px}
+table.ret td{border-top:1px solid var(--line);padding:3px 6px 3px 0;vertical-align:top}
+table.ret td.pid{font-weight:650;color:var(--retrieval);white-space:nowrap}
+table.ret td.sc{color:var(--muted);white-space:nowrap}
+table.ret td.sn{color:#475569;font-size:12.5px}
+
+mark{background:var(--mark);padding:1px 0;border-radius:2px;cursor:pointer}
+mark.hot{background:var(--mark-hi);box-shadow:0 0 0 2px var(--mark-hi)}
+mark.sugg{background:transparent;border-bottom:2px dashed var(--sugg);
+          box-shadow:inset 0 -6px 0 #f5f3ff}
+span.pending{background:var(--mark-hi)}
+
+/* ---- margin notes ---- */
+.note{position:absolute;width:250px;background:#fff;border:1px solid var(--line);
+      border-left:3px solid var(--mark-hi);border-radius:7px;padding:8px 9px;font-size:12.5px;
+      transition:box-shadow .12s}
+.note.hot{box-shadow:0 0 0 2px var(--mark-hi)}
+.note.suggestion{border-left-color:var(--sugg);background:#faf5ff}
+.note .q{color:var(--muted);font-style:italic;font-size:11.5px;margin-bottom:4px;
+         display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.note .tag{font-size:10px;font-weight:700;letter-spacing:.05em;color:#6d28d9;
+           text-transform:uppercase;margin-bottom:3px}
+.note .acts{margin-top:6px;display:flex;gap:6px}
+.note .acts button{border:1px solid var(--line);background:#fff;border-radius:5px;
+                   padding:2px 8px;font:inherit;font-size:11.5px;cursor:pointer}
+.note:not(.suggestion) .acts{visibility:hidden}
+.note:not(.suggestion):hover .acts{visibility:visible}
+
+/* ---- annotation popover ---- */
+#pop{position:absolute;z-index:80;display:none;background:#fff;border:1px solid var(--line);
+     border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.14);padding:9px;width:310px}
+#pop textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:7px;
+              font:inherit;font-size:13px;resize:vertical;min-height:58px}
+#pop .hint{font-size:11px;color:var(--muted);margin-top:5px}
+
+/* ---- tables (label / taxonomy / progress) ---- */
+.panel{background:#fff;border:1px solid var(--line);border-radius:9px;padding:15px;
+       margin:0 auto 15px;max-width:1180px}
+.panel h2{font-size:14px;margin:0 0 10px}
+table.grid{border-collapse:collapse;width:100%;font-size:13px}
+table.grid th,table.grid td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left}
+table.grid th{font-size:11.5px;color:var(--muted);text-transform:uppercase;
+              letter-spacing:.05em;font-weight:650;position:sticky;top:44px;background:#fff}
+table.grid td.c{text-align:center;white-space:nowrap}
+.lbtn{border:1px solid var(--line);background:#fff;border-radius:5px;padding:2px 9px;
+      cursor:pointer;font:inherit;font-size:12px;margin:0 2px}
+.lbtn.pass.on{background:#dcfce7;border-color:#86efac;color:#166534;font-weight:650}
+.lbtn.fail.on{background:#fee2e2;border-color:#fca5a5;color:#991b1b;font-weight:650}
+td.missing{background:#fffbeb}
+.mode{border:1px solid var(--line);border-radius:9px;padding:12px;margin-bottom:11px}
+.mode h3{margin:0 0 3px;font-size:13.5px;font-family:ui-monospace,Menlo,monospace;
+         color:var(--write)}
+.mode .def{margin:0 0 7px}
+.mode .meta{font-size:12px;color:var(--muted)}
+.bar{height:7px;background:#f1f5f9;border-radius:99px;overflow:hidden;margin-top:5px}
+.bar>i{display:block;height:100%;background:var(--agent)}
+.tracelink{cursor:pointer;color:var(--user);text-decoration:underline}
+.empty{color:var(--muted);padding:22px 0;text-align:center}
+button.primary{background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:6px;
+               padding:6px 13px;font:inherit;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div id="bar">
+  <h1>Cartwheel review</h1>
+  <button class="tab on" data-view="trace">Trace</button>
+  <button class="tab" data-view="taxonomy">Taxonomy</button>
+  <button class="tab" data-view="label">Label</button>
+  <button class="tab" data-view="progress">Progress</button>
+  <div id="nav">
+    <button id="prev">&larr;</button>
+    <span id="counter"></span>
+    <button id="next">&rarr;</button>
+    <button id="jump" title="Jump to the first trace with no annotation">Next unreviewed</button>
+  </div>
+</div>
+
+<div id="v-trace" class="view on">
+  <div id="tracewrap"><div id="body"></div><div id="margin"></div></div>
+</div>
+<div id="v-taxonomy" class="view"><div class="panel" id="taxbox"></div></div>
+<div id="v-label" class="view"><div class="panel" id="labelbox"></div></div>
+<div id="v-progress" class="view"><div class="panel" id="progbox"></div></div>
+
+<div id="pop">
+  <textarea id="popnote" placeholder="What went wrong here? Your own words."></textarea>
+  <div class="hint"><b>Enter</b> saves &middot; <b>Esc</b> cancels &middot; Shift+Enter for a new line</div>
+</div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let TRACES = [], ANNS = [], SUGG = [], PATTERNS = {}, LABELS = {};
+let cur = 0, pendingRange = null, pendingAnchor = null;
+
+/* ------------------------------------------------------------------ data */
+async function getJSON(u){ const r = await fetch(u); return r.json(); }
+async function postJSON(u, b){
+  const r = await fetch(u, {method:"POST", headers:{"Content-Type":"application/json"},
+                           body: JSON.stringify(b)});
+  return r.json();
+}
+function toast(msg, ms=2400){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._h); t._h = setTimeout(()=>t.classList.remove("show"), ms);
+}
+const saveAnns = () => postJSON("/api/annotations", ANNS);
+const saveSugg = () => postJSON("/api/suggestions", SUGG);
+
+async function loadAll(){
+  [TRACES, ANNS, SUGG, PATTERNS, LABELS] = await Promise.all([
+    getJSON("/api/traces"), getJSON("/api/annotations"), getJSON("/api/suggestions"),
+    getJSON("/api/patterns"), getJSON("/api/labels")
+  ]);
+  if (!Array.isArray(ANNS)) ANNS = ANNS.annotations || [];
+  if (!Array.isArray(SUGG)) SUGG = [];
+  renderTrace(); renderTaxonomy(); renderLabel(); renderProgress();
+}
+
+/* Poll for work the agent pushed (new suggestions, regrouped taxonomy, new
+   samples) without disturbing an in-progress annotation. */
+setInterval(async () => {
+  if (pendingRange) return;
+  const [s, p, t] = await Promise.all([
+    getJSON("/api/suggestions"), getJSON("/api/patterns"), getJSON("/api/traces")]);
+  const newSugg = (Array.isArray(s) ? s : []).length - SUGG.length;
+  const newTrace = t.length - TRACES.length;
+  SUGG = Array.isArray(s) ? s : []; PATTERNS = p;
+  if (newTrace > 0){ TRACES = t; toast(`${newTrace} new trace(s) added to the sample`); }
+  if (newSugg > 0) toast(`${newSugg} new agent suggestion(s) — see the margin`);
+  if (newSugg || newTrace) { renderTrace(); renderTaxonomy(); renderLabel(); }
+}, 6000);
+
+/* ------------------------------------------------- annotation anchoring */
+/* An annotation is anchored by a block key plus its quoted text. The key
+   survives re-renders; the quote is what gets highlighted. Matching on text
+   rather than character offsets means an annotation still lands after the
+   renderer changes, which it did twice while this was being built. */
+const annsFor = tid => ANNS.filter(a => a.trace_id === tid);
+const suggFor = tid => SUGG.filter(s => s.trace_id === tid && !s.dismissed);
+
+function marksIn(text, items){
+  // Wrap each item's quote where it occurs in `text`. Longest first so a
+  // short quote nested inside a long one does not split it.
+  let out = esc(text);
+  const sorted = [...items].sort((a,b) => (b.quote||"").length - (a.quote||"").length);
+  for (const it of sorted){
+    const q = esc((it.quote || "").trim());
+    if (!q || !out.includes(q)) continue;
+    const cls = it._sugg ? "sugg" : "";
+    out = out.replace(q, `<mark class="${cls}" data-aid="${it.id}">${q}</mark>`);
+  }
+  return out;
+}
+
+function blockHTML(key, cls, role, text, tid){
+  const items = [...annsFor(tid).filter(a => a.anchor === key),
+                 ...suggFor(tid).filter(s => s.anchor === key).map(s => ({...s, _sugg:true}))];
+  // Annotations saved before anchors existed (the first two, from the
+  // reference app) carry no anchor; place them wherever their quote matches.
+  const orphan = [...annsFor(tid).filter(a => !a.anchor && text.includes((a.quote||"").trim())),
+                  ...suggFor(tid).filter(s => !s.anchor && text.includes((s.quote||"").trim()))
+                      .map(s => ({...s, _sugg:true}))];
+  return `<div class="block ${cls}" data-block="${key}">
+            <div class="role">${esc(role)}</div>
+            <div class="txt">${marksIn(text, [...items, ...orphan])}</div>
+          </div>`;
+}
+
+/* ------------------------------------------------------------ trace view */
+function renderTrace(){
+  const t = TRACES[cur];
+  const todo = TRACES.filter(x => !annsFor(x.trace_id).length).length;
+  const seen = t && annsFor(t.trace_id).length ? "✓ " : "";
+  $("#counter").textContent = TRACES.length
+    ? `${seen}${cur+1} / ${TRACES.length}  ·  ${todo} unreviewed` : "0 / 0";
+  $("#prev").disabled = cur <= 0; $("#next").disabled = cur >= TRACES.length - 1;
+  $("#jump").disabled = !todo;
+  if (!t){ $("#body").innerHTML = '<div class="empty">No traces loaded. Run hw4_prepare_review.py.</div>';
+           $("#margin").innerHTML = ""; return; }
+
+  const c = t.conversation, n = annsFor(t.trace_id).length;
+  let h = `<div id="head">
+    <div class="idline">
+      <span class="sid">${esc(t.scenario_id || t.trace_id.slice(0,10))}</span>
+      <span class="pill">${esc(t.role || "?")}</span>
+      ${t.store ? `<span class="pill">store ${esc(t.store)}</span>` : ""}
+      <span class="pill">${c.turns.length} turn${c.turns.length>1?"s":""}</span>
+      <span class="pill">${t.features.tool_call_count || 0} tool calls</span>
+      ${t.flags.map(f => `<span class="pill flag">${esc(f)}</span>`).join("")}
+      ${t.selection.reason ? `<span class="pill why">${esc(t.selection.reason)}</span>` : ""}
+      ${n ? `<span class="pill">${n} note${n>1?"s":""}</span>` : ""}
+    </div>
+    <div class="tid mono">${esc(t.trace_id)}${t.session_id ? " &middot; session " + esc(t.session_id.slice(0,12)) : ""}</div>
+  </div>`;
+
+  if (c.system_prompt){
+    h += `<details class="sys"><summary>system prompt (identical across this prompt version)</summary>
+          <pre>${esc(c.system_prompt)}</pre></details>`;
+  }
+
+  c.turns.forEach((turn, ti) => {
+    if (c.turns.length > 1) h += `<div class="turnsep">TURN ${ti+1} OF ${c.turns.length}</div>`;
+    if (turn.user) h += blockHTML(`t${ti}:user`, "user", "user", turn.user, t.trace_id);
+    turn.steps.forEach(s => {
+      h += `<div class="step ${s.is_write ? "write" : ""}">
+              <div class="stepno">STEP ${s.n}${s.is_write ? '<span class="badge w">write</span>' : ""}</div>`;
+      if (s.reasoning) h += blockHTML(`t${ti}:s${s.n}:why`, "agent", "agent", s.reasoning, t.trace_id);
+      h += `<div class="call"><div class="role">${esc(s.tool)}</div>
+              <div class="mono args">${esc(JSON.stringify(s.arguments))}</div></div>`;
+      h += resultHTML(`t${ti}:s${s.n}:res`, s, t.trace_id);
+      h += `</div>`;
+    });
+    if (turn.reply) h += blockHTML(`t${ti}:reply`, "reply", "final reply", turn.reply, t.trace_id);
+  });
+
+  $("#body").innerHTML = h;
+  layoutNotes();
+}
+
+function resultHTML(key, s, tid){
+  const okBadge = s.ok === true ? '<span class="badge ok">ok</span>'
+                : s.ok === false ? '<span class="badge fail">failed</span>' : "";
+  const denied = s.permission_denied ? '<span class="badge fail">permission denied</span>' : "";
+  let inner = "";
+
+  if (s.kind === "retrieval" && s.result && Array.isArray(s.result.results)){
+    inner = `<table class="ret">${s.result.results.map(r => `<tr>
+        <td class="pid">${esc(r.policy_id)}</td><td class="sc">${(r.score||0).toFixed(2)}</td>
+        <td class="sn">${esc((r.snippet||"").slice(0,190))}</td></tr>`).join("")}</table>`;
+  } else {
+    const text = typeof s.result === "string" ? s.result
+               : JSON.stringify(s.result, null, 1) || "(no result recorded)";
+    const marked = blockText(key, text, tid);
+    // p90 of tool output is 1,125 chars; only genuine outliers fold away.
+    inner = text.length > 1400
+      ? `<details class="big"><summary>${text.length} chars — expand</summary>
+         <pre class="payload mono">${marked}</pre></details>`
+      : `<pre class="payload mono">${marked}</pre>`;
+  }
+  return `<div class="res ${s.kind === "retrieval" ? "retrieval" : ""} ${s.ok === false ? "bad" : ""}"
+               data-block="${key}">
+            <div class="role">result${okBadge}${denied}</div>
+            ${s.summary ? `<div class="summary">${esc(s.summary)}</div>` : ""}
+            ${inner}</div>`;
+}
+
+function blockText(key, text, tid){
+  const items = [...annsFor(tid).filter(a => a.anchor === key),
+                 ...suggFor(tid).filter(s => s.anchor === key).map(s => ({...s,_sugg:true}))];
+  return marksIn(text, items);
+}
+
+/* ------------------------------------------------------- margin notes */
+/* Absolute position inside the margin column, offset from the highlight's
+   rect minus the container's rect. Do not add scrollTop: it double-counts. */
+function layoutNotes(){
+  const t = TRACES[cur]; const box = $("#margin");
+  if (!t){ box.innerHTML = ""; return; }
+  const items = [...annsFor(t.trace_id), ...suggFor(t.trace_id).map(s => ({...s, _sugg:true}))];
+  box.innerHTML = items.map(it => `
+    <div class="note ${it._sugg ? "suggestion" : ""}" data-aid="${it.id}">
+      ${it._sugg ? '<div class="tag">agent suggestion</div>' : ""}
+      <div class="q">&ldquo;${esc((it.quote||"").slice(0,110))}&rdquo;</div>
+      <div>${esc(it.note || it.reason || "")}</div>
+      <div class="acts">${it._sugg
+        ? `<button data-act="accept" data-aid="${it.id}">Accept</button>
+           <button data-act="dismiss" data-aid="${it.id}">Dismiss</button>`
+        : `<button data-act="edit" data-aid="${it.id}">Edit</button>
+           <button data-act="del" data-aid="${it.id}">Delete</button>`}</div>
+    </div>`).join("");
+
+  const cbox = box.getBoundingClientRect();
+  let lowest = 0;
+  box.querySelectorAll(".note").forEach(el => {
+    const mark = $(`mark[data-aid="${el.dataset.aid}"]`);
+    let top = mark ? mark.getBoundingClientRect().top - cbox.top : lowest + 8;
+    if (top < lowest + 8) top = lowest + 8;       // stack, never overlap
+    el.style.top = top + "px";
+    lowest = top + el.offsetHeight;
+  });
+}
+window.addEventListener("resize", layoutNotes);
+
+/* hover linking, both directions */
+document.addEventListener("mouseover", e => {
+  const el = e.target.closest("mark[data-aid], .note[data-aid]"); if (!el) return;
+  document.querySelectorAll(`[data-aid="${el.dataset.aid}"]`).forEach(x => x.classList.add("hot"));
+});
+document.addEventListener("mouseout", e => {
+  const el = e.target.closest("mark[data-aid], .note[data-aid]"); if (!el) return;
+  document.querySelectorAll(`[data-aid="${el.dataset.aid}"]`).forEach(x => x.classList.remove("hot"));
+});
+
+/* ------------------------------------------------ select → popover → save */
+$("#body").addEventListener("mouseup", () => {
+  setTimeout(() => {
+    const sel = window.getSelection();
+    if (!sel || sel.isCollapsed) return;
+    const text = sel.toString().trim();
+    if (text.length < 2) return;
+    const node = sel.anchorNode;
+    const block = (node.nodeType === 1 ? node : node.parentElement).closest("[data-block]");
+    if (!block) return;
+
+    // Wrap the selection so the reviewer can still see what they are
+    // annotating once focus moves to the input and the browser clears the
+    // native selection (SKILL.md, trace view design).
+    const range = sel.getRangeAt(0);
+    const span = document.createElement("span");
+    span.className = "pending";
+    try { range.surroundContents(span); } catch { return; }
+
+    pendingRange = {quote: text, span};
+    pendingAnchor = block.dataset.block;
+    const r = span.getBoundingClientRect();
+    const pop = $("#pop");
+    pop.style.display = "block";
+    pop.style.top = (window.scrollY + r.bottom + 7) + "px";
+    pop.style.left = Math.min(window.scrollX + r.left, window.innerWidth - 330) + "px";
+    $("#popnote").value = ""; $("#popnote").focus();
+    sel.removeAllRanges();
+  }, 0);
+});
+
+function closePop(save){
+  const pop = $("#pop"); const note = $("#popnote").value.trim();
+  if (pendingRange){
+    const span = pendingRange.span;
+    if (save && note){
+      const t = TRACES[cur];
+      ANNS.push({
+        id: "a" + Date.now(),
+        trace_id: t.trace_id,
+        scenario_id: t.scenario_id,
+        quote: pendingRange.quote,
+        anchor: pendingAnchor,
+        note,
+        ts: new Date().toISOString()
+      });
+      saveAnns().then(() => toast("note saved"));
+    }
+    // unwrap the pending highlight
+    const parent = span.parentNode;
+    while (span.firstChild) parent.insertBefore(span.firstChild, span);
+    parent.removeChild(span); parent.normalize();
+  }
+  pendingRange = null; pendingAnchor = null; pop.style.display = "none";
+  if (save) { renderTrace(); renderProgress(); }
+}
+$("#popnote").addEventListener("keydown", e => {
+  if (e.key === "Enter" && !e.shiftKey){ e.preventDefault(); closePop(true); }
+  if (e.key === "Escape"){ e.preventDefault(); closePop(false); }
+});
+
+/* margin note actions */
+$("#margin").addEventListener("click", async e => {
+  const b = e.target.closest("button[data-act]"); if (!b) return;
+  const id = b.dataset.aid, act = b.dataset.act;
+  if (act === "del"){
+    ANNS = ANNS.filter(a => a.id !== id); await saveAnns(); renderTrace(); renderProgress();
+  } else if (act === "edit"){
+    const a = ANNS.find(x => x.id === id); if (!a) return;
+    const v = prompt("Edit note", a.note); if (v === null) return;
+    a.note = v; a.ts = new Date().toISOString(); await saveAnns(); renderTrace();
+  } else if (act === "dismiss"){
+    const s = SUGG.find(x => x.id === id); if (s) s.dismissed = true;
+    await saveSugg(); renderTrace(); toast("suggestion dismissed (kept in state)");
+  } else if (act === "accept"){
+    const s = SUGG.find(x => x.id === id); if (!s) return;
+    s.accepted = true;
+    ANNS.push({id:"a"+Date.now(), trace_id:s.trace_id, quote:s.quote, anchor:s.anchor,
+               note:s.note || s.reason || "", source:"accepted_suggestion",
+               from_suggestion:s.id, ts:new Date().toISOString()});
+    await Promise.all([saveAnns(), saveSugg()]);
+    renderTrace(); renderProgress(); toast("accepted — now a human annotation");
+  }
+});
+
+/* ---------------------------------------------------------- taxonomy view */
+function renderTaxonomy(){
+  const modes = Object.entries(PATTERNS || {});
+  if (!modes.length){
+    $("#taxbox").innerHTML = `<h2>Taxonomy</h2>
+      <div class="empty">No modes yet. The agent groups your notes into candidate
+      modes and pushes them here; you rename, merge, split or reject them.</div>`;
+    return;
+  }
+  $("#taxbox").innerHTML = `<h2>Taxonomy &mdash; ${modes.length} mode(s)</h2>` +
+    modes.map(([name, m]) => {
+      const from = (m.created_from || []).map(id => ANNS.find(a => a.id === id)).filter(Boolean);
+      return `<div class="mode">
+        <h3>${esc(name)}</h3>
+        <p class="def">${esc(m.definition || "(no definition yet)")}</p>
+        <div class="meta">
+          ${(m.example_trace_ids||[]).length} positive &middot;
+          ${(m.close_negatives||[]).length} close negative &middot;
+          ${m.requirement ? "requirement " + esc(m.requirement) : "<b>no requirement source</b>"} &middot;
+          ${esc(m.evaluator || "evaluator undecided")}
+        </div>
+        ${m.boundary ? `<div class="meta">boundary: ${esc(m.boundary)}</div>` : ""}
+        ${from.length ? `<div class="meta" style="margin-top:7px">from your notes:${
+          from.map(a => `<div>&ldquo;${esc((a.note||"").slice(0,120))}&rdquo;</div>`).join("")
+        }</div>` : `<div class="meta" style="margin-top:7px"><b>no originating human annotation</b></div>`}
+      </div>`;
+    }).join("");
+}
+
+/* ------------------------------------------------------------- label view */
+function renderLabel(){
+  const modes = Object.keys(PATTERNS || {});
+  if (!modes.length){
+    $("#labelbox").innerHTML = `<h2>Structured labeling</h2>
+      <div class="empty">Labeling opens once the taxonomy has modes. Finish open
+      coding first — the handout is explicit that categories come after the notes.</div>`;
+    return;
+  }
+  const labelOf = (m, tid) => {
+    const rec = (LABELS[m] || []).find(l => l.trace_id === tid);
+    return rec ? Number(rec.label) : null;
+  };
+  const undecidedOnly = window._undecidedOnly !== false;   // default on: 864 cells is unreadable
+  const visible = TRACES.map((t, i) => [t, i])
+    .filter(([t]) => !undecidedOnly || modes.some(m => labelOf(m, t.trace_id) === null));
+
+  const rows = visible.map(([t, i]) => {
+    const cells = modes.map(m => {
+      const v = labelOf(m, t.trace_id);
+      // In undecided-only mode, settled cells collapse to a read-only mark so the
+      // eye goes straight to what still needs a decision.
+      if (undecidedOnly && v !== null)
+        return `<td class="c" style="color:var(--muted)">${v === 1 ? "Fail" : "Pass"}</td>`;
+      return `<td class="c ${v === null ? "missing" : ""}">
+        <button class="lbtn pass ${v===0?"on":""}" data-m="${esc(m)}" data-t="${t.trace_id}" data-v="0">Pass</button>
+        <button class="lbtn fail ${v===1?"on":""}" data-m="${esc(m)}" data-t="${t.trace_id}" data-v="1">Fail</button>
+      </td>`;
+    }).join("");
+    return `<tr><td><span class="tracelink" data-goto="${i}">${esc(t.scenario_id || t.trace_id.slice(0,8))}</span></td>
+            <td>${esc(t.role||"")}</td>${cells}</tr>`;
+  }).join("");
+  const openCount = TRACES.reduce((n, t) =>
+    n + modes.filter(m => labelOf(m, t.trace_id) === null).length, 0);
+
+  $("#labelbox").innerHTML = `
+    <h2>Structured labeling &mdash; every mode on every trace</h2>
+    <p class="meta" style="color:var(--muted);font-size:12.5px">
+      Fail = the failure is present. Amber cells are undecided. Saved locally on
+      every click; push to Langfuse when you are done with a pass.
+      Click a scenario id to open that trace.</p>
+    <p>
+      <label style="font-size:13px;cursor:pointer">
+        <input type="checkbox" id="undecided" ${undecidedOnly ? "checked" : ""}>
+        show only rows with an undecided cell
+      </label>
+      &nbsp;&mdash;&nbsp;<b>${openCount}</b> cell${openCount===1?"":"s"} left,
+      ${visible.length} row${visible.length===1?"":"s"} shown
+    </p>
+    <p><button class="primary" id="sync">Write labels to Langfuse as scores</button></p>
+    <table class="grid"><thead><tr><th>Trace</th><th>Role</th>
+      ${modes.map(m => `<th>${esc(m)}</th>`).join("")}</tr></thead>
+      <tbody>${rows}</tbody></table>`;
+}
+
+$("#labelbox").addEventListener("change", e => {
+  if (e.target.id === "undecided"){ window._undecidedOnly = e.target.checked; renderLabel(); }
+});
+$("#labelbox").addEventListener("click", async e => {
+  const go = e.target.closest("[data-goto]");
+  if (go){ cur = Number(go.dataset.goto); show("trace"); renderTrace(); return; }
+  if (e.target.id === "sync"){
+    e.target.disabled = true; e.target.textContent = "writing…";
+    const r = await postJSON("/api/labels/sync", {});
+    toast(r.ok ? `${r.written} scores written to Langfuse`
+               : `${r.written||0} written, ${r.failed||0} failed: ${(r.errors||[r.error]).join("; ")}`, 7000);
+    e.target.disabled = false; e.target.textContent = "Write labels to Langfuse as scores";
+    return;
+  }
+  const b = e.target.closest(".lbtn"); if (!b) return;
+  await postJSON("/api/labels", {mode:b.dataset.m, trace_id:b.dataset.t, label:Number(b.dataset.v)});
+  LABELS = await getJSON("/api/labels");
+  renderLabel(); renderProgress();
+});
+
+/* ---------------------------------------------------------- progress view */
+/* Pending depth-scan suggestions, gathered in one place. Without this the only
+   way to reach them is to open each trace and find the dashed highlight. */
+function pendingQueueHTML(){
+  const pend = SUGG.filter(s => !s.accepted && !s.dismissed);
+  if (!pend.length) return `<h2 style="margin-top:18px">Suggestion queue</h2>
+    <div class="empty">No suggestions awaiting a decision.</div>`;
+  const name = tid => (TRACES.find(t => t.trace_id === tid) || {}).scenario_id || tid.slice(0,8);
+  return `<h2 style="margin-top:18px">Suggestion queue &mdash; ${pend.length} awaiting a decision</h2>
+    <table class="grid"><thead><tr><th>Trace</th><th>Mode</th><th>Kind</th>
+      <th>Quoted text</th><th></th></tr></thead><tbody>
+    ${pend.map(s => `<tr>
+      <td><span class="tracelink" data-sgoto="${s.trace_id}">${esc(name(s.trace_id))}</span></td>
+      <td class="mono" style="font-size:12px">${esc(s.mode||"")}</td>
+      <td>${s.kind === "close_negative" ? '<span class="pill">close negative</span>' : "positive"}</td>
+      <td style="color:var(--muted)">&ldquo;${esc((s.quote||"").slice(0,90))}&rdquo;</td>
+      <td class="c"><button class="lbtn" data-sact="accept" data-sid="${s.id}">Accept</button>
+        <button class="lbtn" data-sact="dismiss" data-sid="${s.id}">Dismiss</button></td>
+    </tr>`).join("")}</tbody></table>
+    <p style="color:var(--muted);font-size:12.5px">Accepting promotes a suggestion to a
+    human annotation with source <code>accepted_suggestion</code>. Dismissing records the
+    rejection in <code>suggestions.json</code> rather than deleting it.</p>`;
+}
+
+$("#progbox").addEventListener("click", async e => {
+  const go = e.target.closest("[data-sgoto]");
+  if (go){
+    const i = TRACES.findIndex(t => t.trace_id === go.dataset.sgoto);
+    if (i >= 0){ cur = i; show("trace"); renderTrace(); }
+    return;
+  }
+  const b = e.target.closest("button[data-sact]"); if (!b) return;
+  const s = SUGG.find(x => x.id === b.dataset.sid); if (!s) return;
+  if (b.dataset.sact === "accept"){
+    s.accepted = true;
+    ANNS.push({id:"a"+Date.now(), trace_id:s.trace_id, quote:s.quote, anchor:s.anchor,
+               note:s.note || s.reason || "", source:"accepted_suggestion",
+               from_suggestion:s.id, ts:new Date().toISOString()});
+    await Promise.all([saveAnns(), saveSugg()]);
+    toast("accepted — now a human annotation");
+  } else {
+    s.dismissed = true; await saveSugg(); toast("dismissed (kept in state)");
+  }
+  renderProgress(); renderTrace();
+});
+
+async function renderProgress(){
+  const p = await getJSON("/api/progress");
+  const pct = p.traces_loaded ? Math.round(100 * p.traces_annotated / p.traces_loaded) : 0;
+  $("#progbox").innerHTML = `
+    <h2>Progress</h2>
+    <p><b>${p.traces_annotated}</b> of <b>${p.traces_loaded}</b> loaded traces reviewed
+       (${pct}%) &middot; ${p.annotations} annotations &middot;
+       ${p.no_failure_observed} marked &ldquo;no failure observed&rdquo;</p>
+    <div class="bar"><i style="width:${pct}%"></i></div>
+    <h2 style="margin-top:18px">Sample composition</h2>
+    <table class="grid"><thead><tr><th>Selection strategy</th><th>Traces</th></tr></thead><tbody>
+      ${Object.entries(p.sample_composition).map(([k,v]) =>
+        `<tr><td>${esc(k)}</td><td>${v}</td></tr>`).join("")}
+    </tbody></table>
+    <h2 style="margin-top:18px">Modes</h2>
+    ${p.modes.length ? `<table class="grid"><thead><tr><th>Mode</th><th>Labeled</th>
+      <th>Fail</th><th>Pass</th><th>Undecided</th><th>Sample fraction</th>
+      <th>Not in review set</th></tr></thead><tbody>
+      ${p.modes.map(m => `<tr><td class="mono">${esc(m.mode)}</td><td>${m.labeled}</td>
+        <td>${m.fail}</td><td>${m.pass}</td>
+        <td${m.missing ? ' class="missing"' : ""}>${m.missing}</td>
+        <td>${m.fraction === null ? "&mdash;" : m.fraction}</td>
+        <td>${m.foreign ? `<span class="pill">${m.foreign} demo</span>` : "&mdash;"}</td></tr>`).join("")}
+      </tbody></table>
+      <p style="color:var(--muted);font-size:12.5px">Sample fractions, not prevalence
+      estimates — the sample was deliberately composed, not drawn at random.
+      &ldquo;Not in review set&rdquo; counts labels shipped with the starter repo on
+      synthetic trace ids; they are excluded from every number to the left.</p>`
+      : '<div class="empty">No modes defined yet.</div>'}
+    ${pendingQueueHTML()}`;
+}
+
+/* -------------------------------------------------------------- chrome */
+function show(name){
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.view === name));
+  $("#v-" + name).classList.add("on");
+  $("#nav").style.visibility = name === "trace" ? "visible" : "hidden";
+  if (name === "progress") renderProgress();
+  if (name === "trace") layoutNotes();
+}
+document.querySelectorAll(".tab").forEach(t => t.onclick = () => show(t.dataset.view));
+$("#prev").onclick = () => { if (cur > 0){ cur--; renderTrace(); } };
+$("#next").onclick = () => { if (cur < TRACES.length-1){ cur++; renderTrace(); } };
+/* The list is reordered (reviewed first) on every load, so a remembered index
+   goes stale as soon as a note is saved. This finds the place instead. */
+$("#jump").onclick = () => {
+  const i = TRACES.findIndex(x => !annsFor(x.trace_id).length);
+  if (i >= 0){ cur = i; show("trace"); renderTrace(); }
+  else toast("every loaded trace has at least one note");
+};
+document.addEventListener("keydown", e => {
+  if (pendingRange || /INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if (e.key === "ArrowLeft" && cur > 0){ cur--; renderTrace(); }
+  if (e.key === "ArrowRight" && cur < TRACES.length-1){ cur++; renderTrace(); }
+});
+
+loadAll();
+</script>
+</body>
+</html>
