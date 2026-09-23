@@ -90,7 +90,10 @@ def _load_labels(mode: str) -> list[dict[str, Any]]:
     per trace by dropping any record that has been superseded, and among the
     remaining records for a trace keeps the last one written.
     """
-    rows = _state.read_jsonl(_labels_path(mode))
+    # HW5 exports use Pass=1. Keep the internal failure flags expected by the
+    # existing search/report helpers, without rewriting HW4 annotations.
+    hw5_path = _state.state_path("hw5_labels", f"{mode}.jsonl")
+    rows = _state.read_jsonl(hw5_path if hw5_path.exists() else _labels_path(mode))
     # A record is dead once it carries a ``superseded_by`` pointer (Artifact L:
     # the field is set on the old record when a flip appends its replacement).
     # Nothing is overwritten, so the file keeps the full flip history; this
@@ -100,6 +103,10 @@ def _load_labels(mode: str) -> list[dict[str, Any]]:
     for row in rows:
         if row.get("superseded_by"):
             continue
+        if row.get("label") not in (0, 1):
+            raise ValueError("human labels must be 0 or 1")
+        if hw5_path.exists():
+            row = {**row, "label": 1 - int(row["label"])}
         live[row["trace_id"]] = row
     return list(live.values())
 
@@ -151,6 +158,8 @@ def _test_labels_and_preds(judge: dict[str, Any]) -> tuple[list[int], list[int]]
     test_ids = splits.get(mode, {}).get("test", [])
     labels_by_trace = {r["trace_id"]: r["label"] for r in _load_labels(mode)}
     preds_by_trace = _cached_preds(judge)
+    if any(tid not in labels_by_trace or tid not in preds_by_trace for tid in test_ids):
+        raise guards.GuardViolation("Complete all test predictions and labels before estimating prevalence.")
     test_labels: list[int] = []
     test_preds: list[int] = []
     for tid in test_ids:
@@ -166,6 +175,8 @@ def _unlabeled_preds(judge: dict[str, Any], trace_filter: str) -> list[int]:
     prediction's ``segments`` map)."""
     store = judge.get("store_predictions", {})
     rows = store.get("predictions", [])
+    if judge.get("label_convention") == "pass_positive":
+        rows = [{**row, "pred": 1 - int(row["pred"])} for row in rows]
     if trace_filter == "all":
         return [int(r["pred"]) for r in rows]
     if ":" not in trace_filter:
@@ -181,7 +192,8 @@ def _cached_preds(judge: dict[str, Any]) -> dict[str, int]:
     prompt version. Stored on the judge record under ``predictions`` keyed by
     prompt hash."""
     cache = judge.get("predictions", {})
-    return {tid: int(p) for tid, p in cache.get(judge["prompt_hash"], {}).items()}
+    return {tid: 1 - int(p) if judge.get("label_convention") == "pass_positive" else int(p)
+            for tid, p in cache.get(judge["prompt_hash"], {}).items()}
 
 
 # ---------------------------------------------------------------------------
@@ -337,6 +349,7 @@ def split_labels(
     fractions: tuple[float, float, float] = (0.15, 0.425, 0.425),
     seed: int = 7,
     min_per_class: int = 10,
+    eligible_trace_ids: list[str] | None = None,
 ) -> dict[str, list[str]]:
     """Split the human judgments for ``mode`` into disjoint train/dev/test.
 
@@ -354,6 +367,8 @@ def split_labels(
         seed: RNG seed for a reproducible shuffle (demo seed is 7).
         min_per_class: minimum examples of each class the smaller eval split
             must be able to hold; below this the split raises.
+        eligible_trace_ids: optional reviewed ids after excluding incomplete,
+            out of scope, or related records. The label history is preserved.
 
     Returns:
         ``{"train": [...], "dev": [...], "test": [...]}`` of trace ids,
@@ -363,11 +378,19 @@ def split_labels(
     import random
 
     labels = _load_labels(mode)
+    if eligible_trace_ids is not None:
+        eligible = set(eligible_trace_ids)
+        missing = eligible - {row["trace_id"] for row in labels}
+        if missing:
+            raise ValueError(f"eligible ids have no human labels: {sorted(missing)[:5]}")
+        labels = [row for row in labels if row["trace_id"] in eligible]
     if not labels:
         raise ValueError(f"no labels for mode '{mode}'; label some traces first.")
     fails = sorted(r["trace_id"] for r in labels if r["label"] == 1)
     passes = sorted(r["trace_id"] for r in labels if r["label"] == 0)
 
+    if any(fraction <= 0 for fraction in fractions) or not math.isclose(sum(fractions), 1):
+        raise ValueError("split fractions must be positive and sum to one")
     guards.check_split_class_counts(len(fails), len(passes), min_per_class, fractions)
 
     rng = random.Random(seed)
@@ -391,6 +414,11 @@ def split_labels(
         "dev": sorted(f_dev + p_dev),
         "test": sorted(f_test + p_test),
     }
+    labels_by_id = {row["trace_id"]: row["label"] for row in labels}
+    for name in ("dev", "test"):
+        if any(sum(labels_by_id[tid] == label for tid in assignment[name]) < min_per_class
+               for label in (0, 1)):
+            raise guards.GuardViolation(f"actual {name} split has fewer than {min_per_class} examples of a class")
     # Disjointness is a property of a partition, but assert it so a future
     # edit that breaks it fails loudly rather than leaking silently.
     all_splits = assignment["train"] + assignment["dev"] + assignment["test"]
@@ -443,6 +471,7 @@ def register_judge(mode: str, prompt_text: str, judge_model: str) -> dict[str, s
         "prompt_hash": prompt_hash,
         "model": judge_model,
         "status": "draft",
+        "label_convention": "pass_positive",
         "created_at": _utcnow(),
         "iterations": [],
         "predictions": {},
@@ -464,11 +493,13 @@ def run_judge(
     trace_ids: list[str] | None = None,
     *,
     classify=None,
+    batch_size: int = 10,
 ) -> dict[str, int]:
     """Run a judge and return per-trace binary predictions, cached.
 
-    Predictions are cached by (prompt hash, trace id), so reruns are free and
-    a rerun after an edit only classifies the changed version. Over the full
+    Predictions are cached by (prompt hash, trace id). Completed batches are
+    saved atomically; resume the same judge to classify only missing ids.
+    An interrupted batch may repeat calls not yet saved. Over the full
     store this dispatches through the scaling backend
     (:func:`analysis.helpers.scale.classify_store`), which uses the opt-in
     DocETL map operation for every live batch. For tests, pass a ``classify``
@@ -481,6 +512,7 @@ def run_judge(
         trace_ids: an explicit id list, as an alternative to ``split``.
         classify: optional ``fn(prompt, [traces]) -> {trace_id: 0|1}`` used
             in place of the live/DocETL backend (tests supply a stub).
+        batch_size: maximum traces between checkpoints (default 10).
 
     Returns:
         ``{trace_id: 0|1}`` for the scored traces. Also updates the judge's
@@ -488,6 +520,8 @@ def run_judge(
     """
     judge = _load_judge(judge_id)
     mode = judge["mode"]
+    if not isinstance(batch_size, int) or batch_size < 1:
+        raise ValueError("batch_size must be a positive integer")
 
     store_traces: list[dict[str, Any]] = []
     if split == "store":
@@ -501,19 +535,31 @@ def run_judge(
     else:
         raise ValueError("pass split ('train'/'dev'/'test'/'store') or trace_ids")
 
+    ids = [str(tid) for tid in ids]
+    if not ids or len(set(ids)) != len(ids):
+        raise ValueError("judge input must contain nonempty, unique trace ids")
     cache = judge.setdefault("predictions", {}).setdefault(judge["prompt_hash"], {})
     to_classify = [tid for tid in ids if tid not in cache]
 
-    if to_classify:
+    for start in range(0, len(to_classify), batch_size):
+        batch = to_classify[start:start + batch_size]
         if classify is not None:
-            fresh = classify(judge["prompt_text"], to_classify)
+            fresh = classify(judge["prompt_text"], batch)
         else:  # live/DocETL path; never reached in tests
             fresh = scale.classify_store(
-                judge["prompt_text"], judge["model"], to_classify
+                judge["prompt_text"], judge["model"], batch
             )
+        if set(fresh) - set(batch) or any(pred not in (0, 1) for pred in fresh.values()):
+            raise ValueError("classifier returned unexpected trace ids or nonbinary predictions")
         for tid, pred in fresh.items():
-            cache[str(tid)] = int(pred)
+            cache[str(tid)] = (int(pred) if judge.get("label_convention") == "pass_positive"
+                               else 1 - int(pred))
+        critiques = getattr(fresh, "critiques", {})
+        if critiques:
+            judge.setdefault("critiques", {}).setdefault(judge["prompt_hash"], {}).update(critiques)
         _state.write_json(_judge_path(judge_id), judge)
+        if set(batch) - set(fresh):
+            raise ValueError("classifier returned an incomplete batch; saved returned predictions, resume to finish")
 
     if split == "store":
         traces_by_id = {str(row["trace_id"]): row for row in store_traces}
@@ -531,7 +577,8 @@ def run_judge(
         }
         _state.write_json(_judge_path(judge_id), judge)
 
-    return {tid: int(cache[tid]) for tid in ids if tid in cache}
+    return {tid: int(cache[tid]) if judge.get("label_convention") == "pass_positive" else 1 - int(cache[tid])
+            for tid in ids if tid in cache}
 
 
 # ---------------------------------------------------------------------------
@@ -571,6 +618,8 @@ def judge_alignment(judge_id: str, split: str) -> dict[str, Any]:
     labels_by_trace = {r["trace_id"]: r["label"] for r in _load_labels(mode)}
     preds = _cached_preds(judge)
     missing = [tid for tid in ids if tid not in preds]
+    if any(tid not in labels_by_trace for tid in ids):
+        raise ValueError(f"human labels are missing from the '{split}' split")
     if missing:
         raise ValueError(
             f"judge '{judge_id}' has no predictions for {len(missing)} "

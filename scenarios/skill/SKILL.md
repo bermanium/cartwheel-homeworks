@@ -14,7 +14,7 @@ This skill generates a dataset of agent traces when production traces are unavai
 
 Asking a model to "generate 250 questions for my application" produces narrow data. The model tends to repeat the most common request type and ignores categories that appear less often in its training data. For a support agent, the model produces dozens of order status questions and very few refund boundary cases, store policy overrides, or permission denials. For a coding agent, the model produces many "write a function" requests and very few "fix a failing test in a large repository" or "refactor across three files." Adding more rows does not fix the problem, because more rows of the same kind do not introduce missing kinds.
 
-The synthetic data approach fixes the problem by defining the kinds of variation first, then generating requests that cover each kind. A *scenario* carries both a user request and an expected outcome grounded in the application's authoritative data. The expected outcome is what makes the trace useful for finding failures: without a recorded answer key, a reviewer has nothing to compare the agent's behavior against.
+The synthetic data approach fixes the problem by defining the kinds of variation first, then generating requests that cover each kind. A *scenario* carries both a user request and *extra metadata* from the application's authoritative data. The extra metadata is the structured context (order details, policy rules, data quality issues) that the user request may not mention but that the reviewer needs when checking the agent's work.
 
 ## What a scenario contains
 
@@ -22,7 +22,7 @@ A scenario is a planned interaction with four parts:
 
 1. **A tuple of dimension values** that describe what kind of request the interaction represents. Each dimension is one source of variation that changes the expected behavior or the execution path.
 2. **User messages** (an opening message and optional followups) written in natural language from the tuple, as a real user would type them. The messages do not state hidden facts from the tuple.
-3. **An expected outcome** computed from the application's authoritative data, stating what the agent should do and citing the source that determines the answer.
+3. **Extra metadata** from the application's authoritative data: the order details, applicable policy rules, data quality issues, and other structured context that the user request may not state.
 4. **Metadata** linking the scenario to its group (coverage or challenge) and its identifier.
 
 The scenario is an input to the runner, not a trace. Running a scenario through the instrumented application produces two separate outputs: a result record for the attempted interaction, and traces from the application's instrumentation. The scenario identifier appears on every trace so the plan, the result, and the traces are always linked.
@@ -31,9 +31,9 @@ The scenario is an input to the runner, not a trace. Running a scenario through 
 
 These rules hold throughout the workflow. Each one prevents a specific mistake.
 
-1. **Ground expected outcomes in authoritative sources.** The expected outcome comes from the application's data, rules, or specification, not from the model's answer. If the model's own answer were the answer key, a wrong answer would look correct. For the Cartwheel agent, sources include the database (SQL), the return policy in `facts.yaml`, the policy documents, and the data quality table. For a coding agent, sources might include the test suite, the type checker, or a known correct output.
+1. **Ground extra metadata in authoritative sources.** The extra metadata comes from the application's data, rules, or specification, not from the model's answer. If the model's own answer were the source, a wrong answer would look correct. For the Cartwheel agent, sources include the database (SQL), the return policy in `facts.yaml`, the policy documents, and the data quality table. For a coding agent, sources might include the test suite, the type checker, or a known correct output.
 
-2. **Keep hidden expected answers out of generation prompts.** The model that writes the user's message receives only facts the simulated user would know and never the hidden expected outcome. A shopper asking about a return does not know the exact return window or whether the refund will be approved. A developer asking a coding agent to fix a bug does not state the root cause in the request.
+2. **Keep extra metadata out of generation prompts.** The model that writes the user's message receives only facts the simulated user would know and never the extra metadata. A shopper asking about a return does not know the exact return window or whether the refund will be approved. A developer asking a coding agent to fix a bug does not state the root cause in the request.
 
 3. **Write and review conversation plans before running the application.** Each application run costs model calls for every scenario in the file. Catching an invalid scenario before the run saves the cost of running it. Catching a bad user message before the run saves the cost of a trace that tests the wrong thing.
 
@@ -59,7 +59,7 @@ Do not start bulk generation until authentication, tracing, and any state reset 
 
 A *dimension* is one named source of variation in the requests. A useful dimension changes the expected behavior, the execution path, or a quality requirement. Do not add a dimension merely because it is easy to vary.
 
-Read the application's behavior specification, its data, and any ground truth sources to identify the dimensions. The dimensions depend on the application:
+Read the application's behavior specification, its data, and any authoritative sources to identify the dimensions. The dimensions depend on the application:
 
 | Application | Useful dimensions | Why they matter |
 | --- | --- | --- |
@@ -74,7 +74,7 @@ Read the application's behavior specification, its data, and any ground truth so
 | --- | --- | --- |
 | **Role** | shopper, merchant, support | Different roles have different permissions. A shopper can view their own orders, a merchant can view their store's orders, and support can view any order. |
 | **Intent** | order status, refund, cancellation, policy question, product search, dispute, out of scope | Each intent exercises different tools. A refund calls `get_order` and `issue_refund`, while a policy question calls `search_help_center`. |
-| **Record involved** | an order (in window, past window, above threshold, placed, shipped), a product, a store policy page, none | The record state determines the expected outcome. An order delivered 15 days ago is eligible for a return, while one delivered 45 days ago is not. |
+| **Record involved** | an order (in window, past window, above threshold, placed, shipped), a product, a store policy page, none | The record state determines the extra metadata. An order delivered 15 days ago is eligible for a return, while one delivered 45 days ago is not. |
 | **Applicable policy** | platform rule, store override, none | Some stores override the platform return window. Juniper Home Goods has a 14-day window instead of the platform's 30 days. |
 | **Tools needed** | none, one lookup, several calls | A policy question needs one lookup, while a refund needs several calls. |
 | **Difficulty** | well specified, ambiguous, missing information, boundary | An ambiguous request describes a product without an order number. A boundary request sits exactly at the return window or the refund threshold. |
@@ -86,7 +86,7 @@ Each scenario also records its **turn count** (1 through 25), which equals one p
 
 Do not present a finished dimension list. Start by asking the human to brainstorm in their own words: give one example dimension with a reason (e.g., "One dimension is the user's role, because different roles have different permissions. What other sources of variation do you think would change the agent's behavior?"). Let the human type their own ideas freely. Do not offer multiple choice options for this step. Wait for the human to name at least two dimensions before you propose additional ones.
 
-After the human has contributed dimensions, read the specification, the data, and any ground truth sources to fill in gaps the human may have missed. Present the combined list (the human's dimensions and your additions, each with a reason) and ask the human to approve, revise, or add more. Do not generate scenarios until the dimensions are approved.
+After the human has contributed dimensions, read the specification, the data, and any authoritative sources to fill in gaps the human may have missed. Present the combined list (the human's dimensions and your additions, each with a reason) and ask the human to approve, revise, or add more. Do not generate scenarios until the dimensions are approved.
 
 Any dimension needs a reason from the specification or the data. A dimension without a reason from either source is unlikely to change the expected behavior.
 
@@ -109,7 +109,7 @@ The specific counts depend on the project. Report results for the two pools sepa
 
 Each scenario that involves a record from the application's data must reference a real record. Query the data to find a matching record, and verify that the simulated user has permission to access the record under the specified role.
 
-Scenarios that change state (for example, refunds or cancellations) should target distinct records, so that one scenario's side effects do not invalidate another scenario's expected outcome.
+Scenarios that change state (for example, refunds or cancellations) should target distinct records, so that one scenario's side effects do not invalidate another scenario's extra metadata.
 
 ### Data quality cases
 
@@ -117,9 +117,9 @@ If the application's data contains deliberately damaged or edge-case records, qu
 
 **Cartwheel example.** The seeded database contains six damaged records in the `data_quality_cases` table. For example, order 8002 has a delivered status but no delivery date. A scenario about that order records that the agent must not compute a return deadline from a missing date, and cites `dq-order-missing-delivery-date` as the source.
 
-## Step 4: Compute expected outcomes
+## Step 4: Record extra metadata
 
-Compute the expected outcome for each scenario before generating the user's message. The expected outcome states what the agent should do, and cites the authoritative source that determines the answer.
+Record the extra metadata for each scenario before generating the user's message. The extra metadata captures the relevant data context (order details, applicable rules, data quality issues) and cites the authoritative source.
 
 ### Objective expectations
 
@@ -141,7 +141,7 @@ Use a human judgment expectation when several responses could satisfy the requir
 
 ## Step 5: Generate conversations
 
-Generate the user messages separately from running the application. The generation model writes the user's messages from the tuple and the user-visible facts, but never sees the hidden expected outcome.
+Generate the user messages separately from running the application. The generation model writes the user's messages from the tuple and the user-visible facts, but never sees the extra metadata.
 
 ### One call per conversation
 
@@ -149,7 +149,7 @@ Use one independent model call per conversation, and launch the calls concurrent
 
 ### The generation prompt
 
-Give the generation model the role, the user's goal, the selected style, the user-visible facts, and the required number of turns. Do not include identifiers, exact dates, internal rules, or the expected outcome.
+Give the generation model the role, the user's goal, the selected style, the user-visible facts, and the required number of turns. Do not include identifiers, exact dates, internal rules, or the extra metadata.
 
 **Cartwheel example.** To generate the request for a past-window refund scenario:
 
@@ -183,7 +183,7 @@ After generating all conversations, run an independent critic call for each conv
 - Followups that assume a specific agent response.
 - Conversations that share a template opening or followup.
 - Language that a real user would not produce, such as quoting internal policy names or rule numbers.
-- References to tools, traces, prompts, or expected outcomes that break the simulation.
+- References to tools, traces, prompts, or extra metadata that break the simulation.
 
 The critic may rewrite language but must preserve the grounded plan, the expectation, and the assigned style.
 
@@ -199,7 +199,7 @@ uv run python -m scenarios.validate scenarios/pilot_scenarios.jsonl
 
 The Cartwheel validator checks the JSON schema, required tuple fields, unique identifiers, turn counts, duplicate conversations, and the expected-outcome format.
 
-Then show the human a sample of complete conversations for review. Include the longest conversation, both scenario groups, every role, a state-changing scenario, a difficult scenario, and several user styles. The human reads the opening and every followup and decides whether the language is realistic, the followups make sense without seeing the agent's response, and the expected outcome matches the selected record.
+Then show the human a sample of complete conversations for review. Include the longest conversation, both scenario groups, every role, a state-changing scenario, a difficult scenario, and several user styles. The human reads the opening and every followup and decides whether the language is realistic, the followups make sense without seeing the agent's response, and the extra metadata matches the selected record.
 
 Do not start the runner until the human accepts the conversation sample.
 
@@ -207,7 +207,7 @@ Do not start the runner until the human accepts the conversation sample.
 
 Reset any mutable application state first, because earlier runs may have changed it.
 
-Run a small representative set (about 30 scenarios) on one model. Review at least 10 results. For each result, compare the agent's behavior with the recorded expected outcome. A confirmed failure requires a valid scenario and observed behavior that conflicts with the expected outcome or a specification requirement. Record the evidence: which data value, policy, tool result, or requirement supports the judgment.
+Run a small representative set (about 30 scenarios) on one model. Review at least 10 results. For each result, compare the agent's behavior with the recorded extra metadata. A confirmed failure requires a valid scenario and observed behavior that conflicts with the extra metadata or a specification requirement. Record the evidence: which data value, policy, tool result, or requirement supports the judgment.
 
 The pilot must contain at least five confirmed failures. If it does not, add challenge scenarios from the difficult dimensions, or use a lower-capability model from the same provider. Do not add scenarios by copying requests that happened to fail; use the underlying dimension to generate new cases.
 
@@ -254,7 +254,7 @@ uv run python -m scenarios.export_langfuse \
 
 ## Conversation plan format
 
-Each line of the scenario file is one complete planned interaction. The format depends on the project, but every plan should contain at least a unique identifier, dimension values, user messages, and an expected outcome. Use the project's executable schema when one exists.
+Each line of the scenario file is one complete planned interaction. The format depends on the project, but every plan should contain at least a unique identifier, dimension values, user messages, and extra metadata. Use the project's executable schema when one exists.
 
 **Cartwheel example (objective expectation):**
 

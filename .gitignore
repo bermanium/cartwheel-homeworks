@@ -28,6 +28,7 @@ hw4-video-script.md
 .sessions.db-*
 scenarios/results/
 replay/results/
+.harbor/
 
 # Python
 __pycache__/

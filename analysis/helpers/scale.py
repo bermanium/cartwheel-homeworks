@@ -31,10 +31,40 @@ _SCALE_MODEL_LITELLM = {
 }
 
 
+class JudgeBatch(dict[str, int]):
+    """Binary predictions with the skill's critiques for disagreement review."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.critiques: dict[str, str] = {}
+
+
+def _decode_judge_rows(rows: list[dict[str, Any]], trace_ids: list[str]) -> JudgeBatch:
+    batch = JudgeBatch()
+    expected = set(trace_ids)
+    for row in rows:
+        tid = str(row.get("trace_id", ""))
+        if tid not in expected or tid in batch:
+            raise ValueError("DocETL returned an unexpected or duplicate trace id")
+        verdict = row.get("result")
+        critique = row.get("critique")
+        if verdict not in ("Pass", "Fail"):
+            raise ValueError(f"DocETL result for trace {tid} must be Pass or Fail")
+        if not isinstance(critique, str) or not critique.strip():
+            raise ValueError(f"DocETL result for trace {tid} needs a critique")
+        batch[tid] = 1 if verdict == "Pass" else 0
+        batch.critiques[tid] = critique
+    missing = expected - set(batch)
+    if missing:
+        raise ValueError(f"DocETL returned no result for trace ids: {sorted(missing)[:5]}")
+    return batch
+
+
 def load_store_traces() -> list[dict[str, Any]]:
     """Load the full store slice the frozen judge scales over.
 
-    Sources from Langfuse when it is configured (``LANGFUSE_*`` present),
+    Use ``CARTWHEEL_JUDGE_TRACE_SOURCE`` for an explicit JSON/JSONL
+    export. Otherwise source from Langfuse when configured (``LANGFUSE_*``),
     pulling the error analysis trace slice via
     :func:`analysis.helpers.langfuse_io.fetch_traces`; otherwise reads and
     normalizes the committed export at ``state/store_traces.json``. A
@@ -42,6 +72,24 @@ def load_store_traces() -> list[dict[str, Any]]:
     data, because silently evaluating a different trace collection would
     invalidate the result.
     """
+    source = os.environ.get("CARTWHEEL_JUDGE_TRACE_SOURCE")
+    if source:
+        from .normalization import normalize_trace
+
+        path = Path(source)
+        text = path.read_text(encoding="utf-8")
+        records = ([json.loads(line) for line in text.splitlines() if line.strip()]
+                   if path.suffix == ".jsonl" else json.loads(text))
+        if isinstance(records, dict):
+            records = records.get("traces")
+        if not isinstance(records, list) or not records:
+            raise ValueError("judge trace source must contain a nonempty list of traces")
+        traces = [normalize_trace(record) for record in records]
+        ids = [trace["trace_id"] for trace in traces]
+        if len(set(ids)) != len(ids):
+            raise ValueError("judge trace source contains duplicate trace ids")
+        return traces
+
     from . import langfuse_io
 
     if langfuse_io.is_configured():
@@ -188,14 +236,14 @@ def _run_docetl_map(  # pragma: no cover - requires the docetl extra + a live ke
             f"{prompt_text}\n\n"
             "--- Trace to evaluate ---\n"
             "{{ input.content }}\n\n"
-            "Return passes_mode as true when the trace passes the criterion, "
-            "and false when the named failure is present. Include a short evidence string grounded "
-            "only in the provided trace."
+            "First write a critique of the trace against the criterion. "
+            "Use specific evidence from the provided trace. Then return result "
+            "as exactly Pass when the named failure is absent, or Fail when present."
         ),
         output={
             "schema": {
-                "passes_mode": "boolean",
-                "evidence": "string",
+                "critique": "string",
+                "result": "string",
             }
         },
     )
@@ -211,17 +259,5 @@ def _run_docetl_map(  # pragma: no cover - requires the docetl extra + a live ke
     pipeline.run()
 
     produced = json.loads(out_path.read_text(encoding="utf-8"))
-    result: dict[str, int] = {}
-    for row in produced:
-        tid = row.get("trace_id")
-        if tid is None:
-            continue
-        if "passes_mode" not in row:
-            raise ValueError(f"DocETL result for trace {tid} has no passes_mode field")
-        # Prediction files store failure flags for each named mode, while the
-        # evaluator's public convention defines Pass as positive.
-        result[str(tid)] = 0 if bool(row["passes_mode"]) else 1
-    missing = sorted(set(map(str, trace_ids)) - set(result))
-    if missing:
-        raise ValueError(f"DocETL returned no result for trace ids: {missing[:5]}")
-    return result
+    # HW5 labels and public predictions use Pass=1, Fail=0.
+    return _decode_judge_rows(produced, trace_ids)

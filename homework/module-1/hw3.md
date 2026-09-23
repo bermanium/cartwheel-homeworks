@@ -1,6 +1,6 @@
 # Homework 3, creating the support trace dataset
 
-Homework 3 asks you to create a collection of Cartwheel support traces for Homework 4. A *scenario* is a planned support request with a recorded *expected result*, which states what the agent should do. When you run a scenario, Cartwheel records the conversation, model calls, and tool calls in a *trace*.
+Homework 3 asks you to create a collection of Cartwheel support traces for Homework 4. A *scenario* is a planned support request with *extra metadata* from the database and policy documents that the user request may not mention. When you run a scenario, Cartwheel records the conversation, model calls, and tool calls in a *trace*.
 
 You will begin by deciding which kinds of support requests to include. You will run 30 scenarios first, so you can fix unclear requests and confirm that the agent produces some failures. You will then create the full set of 250 scenarios and export their traces. In Homework 4, you will use the traces to find repeated failure patterns.
 
@@ -14,7 +14,7 @@ If you would like a coding agent to walk you through the assignment, paste the p
 >
 > If something fails, read the error, explain it plainly, and propose a focused fix. Keep a short progress note of what is done and what is next, so we can resume later, and keep a checklist of every deliverable so nothing is skipped. Leave the assessments and the video to me. Do not call the assignment done until every file in the "Files to commit" list exists and the checks in the handout pass.
 >
-> Concepts I need to understand before we use them: what a scenario is and why it records an expected result, why expected results come from the database and the policy documents rather than from the model, what a dimension and a tuple are, why the coverage set and the challenge set are kept apart, and what the pilot is for. Stop at each review point in the handout, the dimension plan, the pilot review, and the final review, and let me make the decisions there. Diagrams that would help me: the path from dimensions to tuples to requests to expected results to traces, and the flow from the scenario file through the runner and the agent into Langfuse.
+> Concepts I need to understand before we use them: what a scenario is and why it records extra metadata, why extra metadata comes from the database and the policy documents rather than from the model, what a dimension and a tuple are, why the coverage set and the challenge set are kept apart, and what the pilot is for. Stop at each review point in the handout, the dimension plan, the pilot review, and the final review, and let me make the decisions there. Diagrams that would help me: the path from dimensions to tuples to requests to extra metadata to traces, and the flow from the scenario file through the runner and the agent into Langfuse.
 
 ## Expected work
 
@@ -109,7 +109,7 @@ uv run python -m scenarios.runner scenarios/pilot_scenarios.jsonl \
   --model YOUR_MODEL --output scenarios/pilot-results.jsonl
 ```
 
-Review at least 10 pilot results in Langfuse. Start with difficult scenarios and cases where the model used an unexpected tool, changed data, or gave an answer that conflicts with the recorded expected result.
+Review at least 10 pilot results in Langfuse. Start with difficult scenarios and cases where the model used an unexpected tool, changed data, or gave an answer that conflicts with the recorded extra metadata.
 
 Create `scenarios/pilot_review.jsonl` with one record for each scenario you review. Record:
 
@@ -119,7 +119,7 @@ Create `scenarios/pilot_review.jsonl` with one record for each scenario you revi
 - `evidence`, naming the database value, policy, tool result, or requirement that supports your decision.
 - `scenario_change`, or `null` when the scenario needs no revision.
 
-Count a failure only when `scenario_valid` is `true` and the observed behavior conflicts with the recorded expected result or a clear requirement in `SPEC.md`.
+Count a failure only when `scenario_valid` is `true` and the observed behavior conflicts with the recorded extra metadata or a clear requirement in `SPEC.md`.
 
 The pilot review must contain at least five confirmed failures. If the first 30 scenarios contain fewer than five, add 20 challenge scenarios, reset the data with `uv run python -m seed.generate`, and run the pilot again. You may instead choose a lower capability model from the same provider. Use the selected model for the final run as well.
 
@@ -158,7 +158,7 @@ The command checks the schema, unique identifiers, group counts, turn counts, du
 
 You will run all 250 scenarios on the model selected during the pilot. Using one model makes the final traces comparable.
 
-Reset the development data first. The pilot changed order states through refunds and cancellations, and the expected outcomes assume the seeded state:
+Reset the development data first. The pilot changed order states through refunds and cancellations, and the extra metadata assumes the seeded state:
 
 ```bash
 uv run python -m seed.generate
@@ -227,7 +227,7 @@ Open three exported traces and confirm that each trace contains the conversation
 
 Record one continuous screen video of no more than 5 minutes. Show the following work:
 
-1. Show one pilot scenario that failed, then show the expected result and evidence.
+1. Show one pilot scenario that failed, then show the extra metadata and evidence.
 2. Show one final scenario that you revised after review.
 3. Open one complete final trace and show its scenario identifier and tool activity.
 4. Regenerate the number of final scenario identifiers:
