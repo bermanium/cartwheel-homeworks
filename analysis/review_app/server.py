@@ -160,9 +160,23 @@ def taxonomy() -> dict[str, Any]:
 
 
 def _all_modes() -> list[str]:
-    """Modes with a label file, plus every mode named in the taxonomy."""
-    modes = {p.stem for p in LABELS_DIR.glob("*.jsonl") if not p.stem.startswith("_")}
-    return sorted(modes | set(taxonomy()))
+    """The taxonomy's modes, which is what this review is about.
+
+    Not every label file is a mode of this review. The starter repository ships
+    `labels/unsupported_policy_claim.jsonl`, 120 labels on synthetic ids, and
+    the course's own Module 2 tests use it as their demo fixture — deleting it
+    breaks six of them. So the file stays on disk and the interface simply does
+    not treat it as one of the reviewer's modes.
+
+    Falls back to the label files when the taxonomy is empty, so a fresh
+    checkout with labels but no `patterns.json` still shows something.
+    """
+    named = set(taxonomy())
+    if named:
+        return sorted(named)
+    return sorted(
+        p.stem for p in LABELS_DIR.glob("*.jsonl") if not p.stem.startswith("_")
+    )
 
 
 def _write_label(mode: str, trace_id: str, label: int, note: str, source: str) -> dict:
