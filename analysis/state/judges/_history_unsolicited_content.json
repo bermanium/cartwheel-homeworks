@@ -1,0 +1,16 @@
+{
+  "versions": [
+    {
+      "judge_id": "unsolicited_content-v0",
+      "prompt_hash": "982865b115b9"
+    },
+    {
+      "judge_id": "unsolicited_content-v1",
+      "prompt_hash": "34fe3bd0b451"
+    },
+    {
+      "judge_id": "unsolicited_content-v2",
+      "prompt_hash": "ac89db15f376"
+    }
+  ]
+}

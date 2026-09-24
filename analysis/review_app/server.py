@@ -58,12 +58,16 @@ API_FILES: dict[str, Path] = {
     "/api/annotations": STATE_DIR / "annotations.json",
     "/api/patterns": STATE_DIR / "patterns.json",
     "/api/suggestions": STATE_DIR / "suggestions.json",
+    # HW5 reads a focused queue of trace ids for one mode. It is a separate
+    # file so the HW4 sample and its manifest stay exactly as they were.
+    "/api/hw5_queue": STATE_DIR / "hw5_queue.json",
 }
 
 API_DEFAULTS: dict[str, Any] = {
     "/api/annotations": [],
     "/api/patterns": {},
     "/api/suggestions": [],
+    "/api/hw5_queue": {},
 }
 
 
@@ -518,6 +522,10 @@ class ReviewHandler(BaseHTTPRequestHandler):
             self.send_response(200)
             self.send_header("Content-Type", "text/html; charset=utf-8")
             self.send_header("Content-Length", str(len(body)))
+            # The page is edited while the reviewer has it open. A cached copy
+            # means they keep running old JavaScript after a fix and cannot
+            # tell, which has already cost one batch of review notes.
+            self.send_header("Cache-Control", "no-store, must-revalidate")
             self.end_headers()
             self.wfile.write(body)
             return

@@ -1,0 +1,38 @@
+{
+  "judge_id": "unsolicited_content-v2",
+  "mode": "unsolicited_content",
+  "split": "test",
+  "model": "openai/rl-muse-spark-1-3-sglang-playground",
+  "prompt_path": "analysis/prompts/unsolicited_content-v2.txt",
+  "prompt_hash": "ac89db15f376",
+  "frozen_at": "2026-09-24T20:28:03.195719+00:00",
+  "tpr": 0.8333,
+  "tnr": 0.65,
+  "tpr_interval": [
+    0.6415,
+    0.9332
+  ],
+  "tnr_interval": [
+    0.4329,
+    0.8188
+  ],
+  "agreement": 0.75,
+  "tp": 20,
+  "fn": 4,
+  "tn": 13,
+  "fp": 7,
+  "n": 44,
+  "disagreements": [
+    "1898d4a2615eb6a0c713a9ac190c64b5",
+    "19c8024050da7fb1e85de3a0705c5048",
+    "1e1b9ecd1493a3d7ec0d8740d181dc97",
+    "1ea9b848e65f1c7f75b6e935b453e311",
+    "208efc4c24d308bae10dd8bf49d7f7b5",
+    "2936da42687e5e3b3bdb1c3c08e5fe0a",
+    "5ccfc003a1415c35dc441bae7eed98b9",
+    "6c27583ca49f3c33b095b0f5b8a14f7d",
+    "960dabde0ba43272aa0ac2d412cba1b5",
+    "9b405a96852f00ab8c5073e81412b46e",
+    "b766b71e6a403e1086c9c97acea3ba42"
+  ]
+}

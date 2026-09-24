@@ -175,6 +175,7 @@ button.primary{background:var(--ink);color:#fff;border:1px solid var(--ink);bord
   <button class="tab on" data-view="trace">Trace</button>
   <button class="tab" data-view="taxonomy">Taxonomy</button>
   <button class="tab" data-view="label">Label</button>
+  <button class="tab" data-view="hw5">HW5</button>
   <button class="tab" data-view="progress">Progress</button>
   <div id="nav">
     <button id="prev">&larr;</button>
@@ -189,6 +190,7 @@ button.primary{background:var(--ink);color:#fff;border:1px solid var(--ink);bord
 </div>
 <div id="v-taxonomy" class="view"><div class="panel" id="taxbox"></div></div>
 <div id="v-label" class="view"><div class="panel" id="labelbox"></div></div>
+<div id="v-hw5" class="view"><div class="panel" id="hw5box"></div></div>
 <div id="v-progress" class="view"><div class="panel" id="progbox"></div></div>
 
 <div id="pop">
@@ -202,7 +204,7 @@ button.primary{background:var(--ink);color:#fff;border:1px solid var(--ink);bord
 const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-let TRACES = [], ANNS = [], SUGG = [], PATTERNS = {}, LABELS = {};
+let TRACES = [], ANNS = [], SUGG = [], PATTERNS = {}, LABELS = {}, HW5Q = {};
 let cur = 0, pendingRange = null, pendingAnchor = null;
 
 /* ------------------------------------------------------------------ data */
@@ -220,13 +222,14 @@ const saveAnns = () => postJSON("/api/annotations", ANNS);
 const saveSugg = () => postJSON("/api/suggestions", SUGG);
 
 async function loadAll(){
-  [TRACES, ANNS, SUGG, PATTERNS, LABELS] = await Promise.all([
+  [TRACES, ANNS, SUGG, PATTERNS, LABELS, HW5Q] = await Promise.all([
     getJSON("/api/traces"), getJSON("/api/annotations"), getJSON("/api/suggestions"),
-    getJSON("/api/patterns"), getJSON("/api/labels")
+    getJSON("/api/patterns"), getJSON("/api/labels"), getJSON("/api/hw5_queue")
   ]);
   if (!Array.isArray(ANNS)) ANNS = ANNS.annotations || [];
   if (!Array.isArray(SUGG)) SUGG = [];
-  renderTrace(); renderTaxonomy(); renderLabel(); renderProgress();
+  if (!HW5Q || typeof HW5Q !== "object") HW5Q = {};
+  renderTrace(); renderTaxonomy(); renderLabel(); renderHw5(); renderProgress();
 }
 
 /* Poll for work the agent pushed (new suggestions, regrouped taxonomy, new
@@ -593,6 +596,222 @@ $("#labelbox").addEventListener("click", async e => {
   renderLabel(); renderProgress();
 });
 
+/* --------------------------------------------------------------- HW5 view */
+/* A focused re-review pass: one mode, a fixed list of trace ids, the request
+   and the reply read together. The HW4 grid is 108 x 8 cells, which is the
+   wrong instrument for confirming twenty defaulted labels. Writes go through
+   the same /api/labels endpoint, so the append-only history is preserved and
+   a flip stays inspectable. */
+const HW5_CARD = "border:1px solid var(--line,#d8d8d8);border-radius:8px;padding:14px 16px;margin:14px 0";
+const HW5_BOX  = "white-space:pre-wrap;padding:8px 10px;border-radius:6px;margin:6px 0";
+
+function hw5Label(mode, tid){
+  return (LABELS[mode] || []).find(l => l.trace_id === tid) || null;
+}
+
+function hw5TraceHTML(trace){
+  const turns = ((trace && trace.conversation) || {}).turns || [];
+  if (!turns.length) return '<div class="empty">No conversation rendered for this trace.</div>';
+  return turns.map(turn => {
+    const steps = (turn.steps || []).map(s =>
+      `<li><code>${esc(s.tool || "")}</code> ${esc(JSON.stringify(s.arguments || {}))}` +
+      `${s.permission_denied ? ' &mdash; <b style="color:#b45309">permission denied</b>' : ""}</li>`
+    ).join("");
+    return `
+      <div style="${HW5_BOX};background:#f4f6f8"><b>User asked</b><br>${esc(turn.user || "")}</div>
+      ${steps ? `<details style="margin:4px 0 6px 2px;font-size:12.5px">
+        <summary style="cursor:pointer;color:var(--muted,#666)">${(turn.steps || []).length} tool call(s)</summary>
+        <ul style="margin:6px 0 0 18px">${steps}</ul></details>` : ""}
+      <div style="${HW5_BOX};background:#fffdf3"><b>Agent replied</b><br>${esc(turn.reply || "")}</div>`;
+  }).join("");
+}
+
+/* Typed-but-unsaved note text, keyed by trace id. The first cut of this panel
+   re-rendered every card on each click, which destroyed the <input> elements
+   and silently discarded anything typed into them. Drafts live outside the DOM
+   so a re-render cannot lose them, a saved note is rendered back into the box
+   so it is visibly on disk, and a click now repaints one card instead of all
+   of them, which also keeps the scroll position. */
+const HW5_DRAFTS = {};
+
+/* "Decided" means decided in *this* queue. Batch 1 and 2 re-reviewed labels
+   that were still on the seeded default, so a non-default source was enough.
+   Later queues re-open labels the reviewer already set by hand, where that test
+   marks everything done before they start. When the queue carries a
+   created_at, a label counts only if it was written after the queue opened. */
+function hw5Settled(mode, tid){
+  const rec = hw5Label(mode, tid) || {};
+  if (rec.source === "reviewer_default" || rec.label === undefined) return false;
+  if (!HW5Q.created_at) return true;
+  return String(rec.ts || "") >= String(HW5Q.created_at);
+}
+
+function hw5SavedNote(mode, tid){
+  const rec = hw5Label(mode, tid) || {};
+  // The seeded default carries boilerplate prose, not the reviewer's words.
+  return rec.source === "reviewer_default" ? "" : (rec.note || "");
+}
+function hw5NoteValue(mode, tid){
+  return tid in HW5_DRAFTS ? HW5_DRAFTS[tid] : hw5SavedNote(mode, tid);
+}
+function hw5Dirty(mode, tid){
+  return tid in HW5_DRAFTS && HW5_DRAFTS[tid] !== hw5SavedNote(mode, tid);
+}
+
+/* The judge's verdict and critique beside the human label, which the handout
+   requires for development review. Shown only when the queue asks for it: a
+   label pass over test traces must stay independent of anything the judge said,
+   so those queues set show_verdicts false and this renders nothing. */
+function hw5VerdictHTML(tid){
+  if (!HW5Q.show_verdicts) return "";
+  const v = (HW5Q.verdicts || {})[tid];
+  if (!v) return "";
+  const fail = v.verdict === "Fail";
+  return `<div style="${HW5_BOX};background:${fail ? "#fff1f2" : "#f0fdf4"};
+                      border:1px solid ${fail ? "#fecdd3" : "#bbf7d0"}">
+    <b>Judge said ${esc(v.verdict)}</b><br>${esc(v.critique || "(no critique recorded)")}</div>`;
+}
+
+function hw5CardHTML(tid, i){
+  const mode = HW5Q.mode;
+  const ids = HW5Q.trace_ids || [];
+  const trace = TRACES.find(t => t.trace_id === tid);
+  const rec = hw5Label(mode, tid) || {};
+  const settled = hw5Settled(mode, tid);
+  const v = rec.label === undefined ? null : Number(rec.label);
+  const note = hw5NoteValue(mode, tid);
+  const dirty = hw5Dirty(mode, tid);
+  return `<div id="hw5card-${esc(tid)}" style="${HW5_CARD};${settled ? "opacity:.72" : ""}">
+    <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px">
+      <b>${i + 1}/${ids.length} &middot; ${esc((trace && trace.scenario_id) || tid.slice(0, 8))}</b>
+      <span style="font-size:12.5px;color:var(--muted,#666)">
+        role ${esc((trace && trace.role) || "?")} &middot;
+        current: ${v === 1 ? "Fail" : "Pass"} (${esc(rec.source || "none")})
+      </span>
+    </div>
+    ${hw5TraceHTML(trace)}
+    ${hw5VerdictHTML(tid)}
+    <div style="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="lbtn pass ${settled && v === 0 ? "on" : ""}" data-h5="${esc(tid)}" data-v="0">Pass &mdash; nothing unsolicited</button>
+      <button class="lbtn fail ${settled && v === 1 ? "on" : ""}" data-h5="${esc(tid)}" data-v="1">Fail &mdash; unsolicited content</button>
+      <input class="hw5note" data-note="${esc(tid)}" value="${esc(note)}"
+             placeholder="why (optional) &mdash; saves on Enter or when you click away"
+             style="flex:1;min-width:240px;padding:6px 8px;font:inherit;font-size:13px">
+      <span data-notestate="${esc(tid)}" style="font-size:12px;color:${dirty ? "#b45309" : "var(--muted,#666)"};min-width:52px">
+        ${dirty ? "unsaved" : (note ? "saved" : "")}</span>
+    </div>
+  </div>`;
+}
+
+function hw5CountsHTML(){
+  const mode = HW5Q.mode, ids = HW5Q.trace_ids || [];
+  const pending = ids.filter(tid => !hw5Settled(mode, tid));
+  const flipped = ids.filter(tid =>
+    hw5Settled(mode, tid) && Number((hw5Label(mode, tid) || {}).label) === 1).length;
+  // Notes landed on the server, counted from the labels the server just
+  // returned rather than from anything held in the page. If this number does
+  // not move when a note is typed, the note is not being saved.
+  const noted = ids.filter(tid => hw5Settled(mode, tid) && hw5SavedNote(mode, tid)).length;
+  return `<b>${ids.length - pending.length}</b> of ${ids.length} confirmed &middot;
+    <b>${pending.length}</b> still on the default &middot;
+    <b>${flipped}</b> flipped to Fail &middot;
+    <b>${noted}</b> note${noted === 1 ? "" : "s"} saved to disk.`;
+}
+
+function renderHw5(){
+  const box = $("#hw5box");
+  const mode = HW5Q.mode;
+  const ids = Array.isArray(HW5Q.trace_ids) ? HW5Q.trace_ids : [];
+  if (!mode || !ids.length){
+    box.innerHTML = `<h2>HW5 re-review</h2>
+      <div class="empty">No queue loaded. The agent writes one to
+      <code>analysis/state/hw5_queue.json</code>.</div>`;
+    return;
+  }
+  box.innerHTML = `
+    <h2>HW5 re-review &mdash; <code>${esc(mode)}</code>${HW5Q.batch ? ` &middot; batch ${esc(String(HW5Q.batch))}` : ""}
+      <span style="font-size:12px;font-weight:normal;color:#0a7d33;border:1px solid #0a7d33;
+                   border-radius:10px;padding:1px 8px;vertical-align:middle">notes v2</span></h2>
+    <p class="meta" style="color:var(--muted,#666);font-size:12.5px">
+      ${esc(HW5Q.purpose || "")} Seed ${esc(String(HW5Q.seed))}, ${ids.length} of
+      ${esc(String(HW5Q.population))}.</p>
+    <div style="${HW5_BOX};background:#eef4ff;font-size:13px">
+      <b>The boundary.</b> ${HW5Q.boundary ? esc(HW5Q.boundary) : `Fail = the agent said
+      more than the user asked, or offered an action the user did not request. It is
+      not a Fail when SPEC section 5 requires the offer, nor when the agent explains a
+      refusal.`}
+    </div>
+    <p id="hw5counts">${hw5CountsHTML()}</p>
+    ${ids.map((tid, i) => hw5CardHTML(tid, i)).join("")}`;
+}
+
+function hw5RepaintCard(tid){
+  const el = document.getElementById("hw5card-" + tid);
+  const ids = HW5Q.trace_ids || [];
+  if (!el) { renderHw5(); return; }
+  el.outerHTML = hw5CardHTML(tid, ids.indexOf(tid));
+  const counts = $("#hw5counts");
+  if (counts) counts.innerHTML = hw5CountsHTML();
+}
+
+/* Write the current label and note for one trace. Note-only edits resend the
+   label that is already on record, so the note lands without changing the
+   verdict; the file is append-only, so the edit stays visible as its own line. */
+async function hw5Save(tid, label){
+  const mode = HW5Q.mode;
+  const rec = hw5Label(mode, tid) || {};
+  const value = label === undefined ? Number(rec.label) : Number(label);
+  await postJSON("/api/labels", {
+    mode: mode, trace_id: tid, label: value,
+    note: hw5NoteValue(mode, tid), source: "human"
+  });
+  LABELS = await getJSON("/api/labels");
+  delete HW5_DRAFTS[tid];
+  hw5RepaintCard(tid);
+  renderLabel(); renderProgress();
+}
+
+$("#hw5box").addEventListener("input", e => {
+  const box = e.target.closest(".hw5note");
+  if (!box) return;
+  const tid = box.dataset.note;
+  HW5_DRAFTS[tid] = box.value;
+  const flag = $(`[data-notestate="${tid}"]`);
+  if (flag){
+    const dirty = hw5Dirty(HW5Q.mode, tid);
+    flag.textContent = dirty ? "unsaved" : (box.value ? "saved" : "");
+    flag.style.color = dirty ? "#b45309" : "var(--muted,#666)";
+  }
+});
+
+/* Commit a note when focus leaves the box, so a note typed after the verdict
+   is not lost. Only fires once the trace has a verdict to attach it to. */
+$("#hw5box").addEventListener("focusout", async e => {
+  const box = e.target.closest(".hw5note");
+  if (!box) return;
+  const tid = box.dataset.note;
+  if (!hw5Dirty(HW5Q.mode, tid)) return;
+  if (!hw5Settled(HW5Q.mode, tid)){
+    toast("Choose Pass or Fail first — the note saves with the verdict", 3200);
+    return;
+  }
+  await hw5Save(tid);
+  toast("note saved");
+});
+
+$("#hw5box").addEventListener("keydown", e => {
+  const box = e.target.closest(".hw5note");
+  if (box && e.key === "Enter"){ e.preventDefault(); box.blur(); }
+});
+
+$("#hw5box").addEventListener("click", async e => {
+  const b = e.target.closest("[data-h5]");
+  if (!b) return;
+  const tid = b.dataset.h5;
+  await hw5Save(tid, Number(b.dataset.v));
+  toast(`${Number(b.dataset.v) === 1 ? "Fail" : "Pass"} saved`);
+});
+
 /* ---------------------------------------------------------- progress view */
 /* Pending depth-scan suggestions, gathered in one place. Without this the only
    way to reach them is to open each trace and find the dashed highlight. */
@@ -678,6 +897,7 @@ function show(name){
   $("#v-" + name).classList.add("on");
   $("#nav").style.visibility = name === "trace" ? "visible" : "hidden";
   if (name === "progress") renderProgress();
+  if (name === "hw5") renderHw5();
   if (name === "trace") layoutNotes();
 }
 document.querySelectorAll(".tab").forEach(t => t.onclick = () => show(t.dataset.view));

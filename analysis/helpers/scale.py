@@ -244,8 +244,26 @@ def _run_docetl_map(  # pragma: no cover - requires the docetl extra + a live ke
             "schema": {
                 "critique": "string",
                 "result": "string",
-            }
+            },
+            # DocETL's default asks the provider to *force* a named function
+            # call. The endpoint serving the Cartwheel agent's own model rejects
+            # that outright ("only `auto` is supported for `tool_choice`"), so
+            # every batch fails before a single trace is scored. This mode asks
+            # for a JSON-shaped answer against the same schema instead, which
+            # that endpoint does support. Providers that accept forced calls are
+            # unaffected: they honour the schema either way.
+            "mode": "structured_output",
         },
+        # Reasoning models spend their output budget thinking before they answer,
+        # and the verdict comes last, so a cap that the reasoning reaches returns
+        # `content: null` and the batch dies with nothing to parse. How much
+        # reasoning a trace provokes is not a function of its length and is not
+        # stable between runs: the same trace measured here used 5,532 reasoning
+        # tokens on one call and 2,662 on the next. A ceiling sized to the
+        # average therefore fails intermittently on the tail, which is what
+        # 8,000 did. This is a limit, not an amount spent; unused headroom costs
+        # nothing, while an exceeded cap costs the whole batch.
+        litellm_completion_kwargs={"max_tokens": 24000},
     )
     pipeline = Pipeline(
         name="cartwheel_judge_batch",

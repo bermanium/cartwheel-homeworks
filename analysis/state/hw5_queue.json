@@ -1,0 +1,14 @@
+{
+  "mode": "unsolicited_content",
+  "batch": 5,
+  "purpose": "One trace: the label-consistency check between support-0049 and support-0048. The judge verdict is hidden so the call stays yours.",
+  "seed": "n/a - targeted pick, not a random draw",
+  "population": 1,
+  "show_verdicts": false,
+  "created_at": "2026-09-24T20:08:28.669586+00:00",
+  "boundary": "Fail = the agent said more than the user asked, or offered an action the user did not request. Settled rules: a closing offer after the request is answered is a Fail, generic or specific. An offer attached to a refusal is a Fail unless SPEC section 5 independently requires a human (ESC-2 account changes, ESC-3 disputes it cannot resolve, ESC-4 policy uncertainty, ESC-1/ESC-5 at or above $100). A specific next step while the request is still in flight is a Pass. Naming what is in scope after a fully out-of-scope request is a Pass.   ///  WHY THIS TRACE IS BACK: it is close to support-0048, which you reviewed on 24 Sep and kept as Pass, noting \"this is related to the request, so i think is a good follow up. IT would be worse to completely stonewall the request.\" There the agent said: \"If the customer might have the wrong order number, I can help you list your store's recent orders or search by product name to find the right one.\" This trace carries that same offer to search the merchant's own orders, and adds a second clause offering to open a ticket for a human. Its current Fail label is from HW4 open coding and has never been revisited. Either verdict is defensible - the two traces can legitimately differ on the escalation clause alone - but they should not differ by accident.",
+  "trace_ids": [
+    "484960e70fad3d22ea92badf724db9f2"
+  ],
+  "verdicts": {}
+}
