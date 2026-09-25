@@ -292,7 +292,21 @@ def cartwheel_judge(workspace: Path) -> bool:
                 + "Use specific evidence from the provided trace. Then return result "
                 + "as exactly Pass when the named failure is absent, or Fail when present."
             ),
-            output={"schema": {"critique": "string", "result": "string"}},
+            # Two settings the Homework 5 judge run established, both required
+            # by the endpoint serving the course model and harmless elsewhere.
+            # DocETL's default forces a named function call, which that
+            # endpoint refuses outright ("only `auto` is supported for
+            # `tool_choice`"), so the schema is requested as structured output
+            # instead. And the model reasons before answering, so a low ceiling
+            # returns `content: null` and the trace is never scored; the same
+            # trace measured 5,532 reasoning tokens on one call and 2,662 on
+            # the next, so the limit is sized for the tail, not the average.
+            # Unused headroom costs nothing; an exceeded cap costs the verdict.
+            output={
+                "schema": {"critique": "string", "result": "string"},
+                "mode": "structured_output",
+            },
+            litellm_completion_kwargs={"max_tokens": 24000},
         )
         pipeline = Pipeline(
             name="cartwheel_judge",
