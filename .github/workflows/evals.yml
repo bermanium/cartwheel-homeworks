@@ -28,6 +28,10 @@ jobs:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
       TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      # The agent model and the frozen Homework 5 judge both reach an
+      # OpenAI-compatible endpoint that is not OpenAI's own, so the address
+      # travels with the key. It is not a credential and stays a variable.
+      OPENAI_BASE_URL: ${{ vars.OPENAI_BASE_URL }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -35,9 +39,39 @@ jobs:
       - uses: astral-sh/setup-uv@v5
       - run: uv sync
 
-      # Homework 6: install Harbor 0.23.0.
-      # Generate the classified tasks in eval_cases/cases.jsonl.
-      # Run five attempts per task in fresh Docker containers.
-      # Pass the agent and judge provider keys to Harbor.
-      # Summarize the job and upload the job files with `if: always()` so a
-      # failed regression keeps its evidence.
+      - name: Install Harbor
+        run: |
+          uv tool install 'harbor==0.23.0'
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Generate the classified Harbor tasks
+        run: uv run python scripts/export_harbor_tasks.py
+
+      - name: Run every case five times in a fresh Docker container
+        run: |
+          harbor run \
+            -p .harbor/tasks \
+            -a harbor_adapter.agent:CartwheelAgent \
+            -m "$CARTWHEEL_MODEL" \
+            -e docker \
+            --n-attempts 5 \
+            --job-name hw6-evals \
+            --jobs-dir .harbor/jobs \
+            --yes
+
+      # Always summarize: a regression case that fails is the evidence this
+      # job exists to produce, and the summary is what blocks the merge.
+      - name: Summarize the job and apply the CI gate
+        if: always()
+        run: |
+          uv run python scripts/summarize_harbor_job.py \
+            .harbor/jobs/hw6-evals \
+            --expected-attempts 5
+
+      - name: Upload the Harbor job files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hw6-evals
+          path: .harbor/jobs/hw6-evals
+          if-no-files-found: warn

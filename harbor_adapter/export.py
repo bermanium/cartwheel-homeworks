@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import tempfile
@@ -166,9 +167,18 @@ def _task_toml(case: dict[str, Any], judges: list[dict[str, Any]]) -> str:
         "timeout_sec = 300.0",
     ]
     keys = sorted({key for judge in judges if (key := _provider_key(judge["model"]))})
+    # A judge reached through a provider's name but hosted at another address
+    # needs the base URL as well as the key, or the verifier calls the wrong
+    # endpoint. Only pass one that the exporting environment actually sets, so
+    # tasks for a judge on its provider's own endpoint stay unchanged.
+    keys.extend(
+        base_url
+        for key in list(keys)
+        if (base_url := key.removesuffix("_API_KEY") + "_BASE_URL") in os.environ
+    )
     if keys:
         lines.extend(["", "[verifier.env]"])
-        lines.extend(f'{key} = "${{{key}}}"' for key in keys)
+        lines.extend(f'{key} = "${{{key}}}"' for key in sorted(keys))
     lines.extend(
         [
             "",

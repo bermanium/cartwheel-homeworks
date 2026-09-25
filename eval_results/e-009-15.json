@@ -1,0 +1,117 @@
+{
+  "case_id": "e-009",
+  "model": "openai/rl-muse-spark-1-3-sglang-playground",
+  "trial_order": "result.json trial_results order",
+  "trials": [
+    {
+      "trial_name": "e-009.1",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-009.2",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-009.3",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-009.4",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-009.5",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-009.6",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-009.7",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-009.8",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-009.9",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-009.10",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-009.11",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-009.12",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-009.13",
+      "passed": 1
+    },
+    {
+      "trial_name": "e-009.14",
+      "passed": 0
+    },
+    {
+      "trial_name": "e-009.15",
+      "passed": 0
+    }
+  ],
+  "rewards": [
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    1,
+    0,
+    1,
+    1,
+    1,
+    0,
+    1,
+    0,
+    0
+  ],
+  "n": 15,
+  "successes": 6,
+  "comparisons": [
+    {
+      "n": 5,
+      "successes": 1,
+      "pass_at_k": {
+        "1": 0.19999999999999996,
+        "3": 0.6,
+        "5": 1.0
+      }
+    },
+    {
+      "n": 10,
+      "successes": 4,
+      "pass_at_k": {
+        "1": 0.4,
+        "3": 0.8333333333333334,
+        "5": 0.9761904761904762
+      }
+    },
+    {
+      "n": 15,
+      "successes": 6,
+      "pass_at_k": {
+        "1": 0.4,
+        "3": 0.8153846153846154,
+        "5": 0.958041958041958,
+        "10": 1.0,
+        "15": 1.0
+      }
+    }
+  ]
+}
