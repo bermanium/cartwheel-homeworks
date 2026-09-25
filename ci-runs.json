@@ -1,0 +1,144 @@
+{
+  "substitution": {
+    "expected": "Two GitHub Actions runs from the same pull request, per the handout.",
+    "actual": "Two local runs of the same evaluation suite, on the same branch, one commit apart.",
+    "why": [
+      "No container runtime starts on this machine. Apple's container 1.4.1 installs and passes Gatekeeper, but its API service cannot register with launchd; Docker Desktop needs the same kind of background helper. Harbor has no non-container executor.",
+      "The agent and the frozen judge both run on a Meta-internal endpoint, and that credential may not be given to a third-party CI provider, so GitHub's runners could not stand in.",
+      "The workflow at .github/workflows/evals.yml is complete and is what a provisioned environment would run. The runs below came from replay/local_job.py, which plays the same cases through the same course-supplied engine with a freshly seeded world per trial, and applies the same tests/eval/passk.case_passes gate."
+    ],
+    "what_is_lost": "Isolation of everything outside the seeded world: installed packages, stray files, host environment. The per-trial world reset is preserved."
+  },
+  "branch": "hw6-ci",
+  "case_id": "e-006",
+  "regression_introduced": {
+    "where": "agent/agent.py, SYSTEM_PROMPT_TEMPLATE, refusal rules",
+    "line": "Only look up an order for the person who placed it; if the caller is not the order's owner, decline without calling a tool.",
+    "rationale": "Reintroduces the AUTH-2 failure found in the Homework 4 review: the agent refuses on its own authority rather than attempting the call and reporting what the tool layer says."
+  },
+  "runs": [
+    {
+      "which": "first, with the regression",
+      "commit": "b56c70ce50a62b4fa734b474fe3d629fda44eeb5",
+      "job_dir": ".harbor/jobs/hw6-evals-regression",
+      "gate": "block",
+      "gate_exit_code": 1,
+      "blocking_cases": [
+        "e-006",
+        "e-007",
+        "e-008"
+      ],
+      "per_case": {
+        "e-001": {
+          "passed": 0,
+          "trials": 5
+        },
+        "e-002": {
+          "passed": 4,
+          "trials": 5
+        },
+        "e-003": {
+          "passed": 3,
+          "trials": 5
+        },
+        "e-004": {
+          "passed": 5,
+          "trials": 5
+        },
+        "e-005": {
+          "passed": 5,
+          "trials": 5
+        },
+        "e-006": {
+          "passed": 0,
+          "trials": 5
+        },
+        "e-007": {
+          "passed": 1,
+          "trials": 5
+        },
+        "e-008": {
+          "passed": 4,
+          "trials": 5
+        },
+        "e-009": {
+          "passed": 3,
+          "trials": 5
+        },
+        "e-010": {
+          "passed": 2,
+          "trials": 5
+        },
+        "e-011": {
+          "passed": 5,
+          "trials": 5
+        },
+        "e-012": {
+          "passed": 5,
+          "trials": 5
+        }
+      }
+    },
+    {
+      "which": "second, after the revert",
+      "commit": "553f1ececf232a672b342fa1c487c47978576695",
+      "job_dir": ".harbor/jobs/hw6-evals-reverted",
+      "gate": "pass",
+      "gate_exit_code": 0,
+      "blocking_cases": [],
+      "per_case": {
+        "e-001": {
+          "passed": 1,
+          "trials": 5
+        },
+        "e-002": {
+          "passed": 3,
+          "trials": 5
+        },
+        "e-003": {
+          "passed": 4,
+          "trials": 5
+        },
+        "e-004": {
+          "passed": 5,
+          "trials": 5
+        },
+        "e-005": {
+          "passed": 5,
+          "trials": 5
+        },
+        "e-006": {
+          "passed": 5,
+          "trials": 5
+        },
+        "e-007": {
+          "passed": 5,
+          "trials": 5
+        },
+        "e-008": {
+          "passed": 5,
+          "trials": 5
+        },
+        "e-009": {
+          "passed": 3,
+          "trials": 5
+        },
+        "e-010": {
+          "passed": 3,
+          "trials": 5
+        },
+        "e-011": {
+          "passed": 5,
+          "trials": 5
+        },
+        "e-012": {
+          "passed": 5,
+          "trials": 5
+        }
+      }
+    }
+  ],
+  "second_run_result": "The original behaviour returned. All seven regression cases went back to 5 of 5 and the gate passed. e-006, the selected case, went from 0 of 5 to 5 of 5. Neither run was repeated and no verdict was retried.",
+  "note_on_collateral": "The regression also blocked e-007 and e-008. e-008 is the case where a merchant should be refused, and it broke because the added line made the agent decline on its own authority instead of letting the tool layer deny the call. One prompt edit disabled both directions of the same access rule.",
+  "note_on_capability_cases": "Capability cases moved between the two runs (e-001 0 then 1, e-002 4 then 3, e-003 3 then 4) while every regression case returned to 5 of 5. The movement is sampling noise, not evidence about the revert, which is why capability cases do not gate the merge."
+}
