@@ -105,7 +105,15 @@ def judge_sample(
                 "Use specific evidence from the provided trace. Then return result "
                 "as exactly Pass when the named failure is absent, or Fail when present."
             ),
-            output={"schema": {"critique": "string", "result": "string"}},
+            # The two settings the frozen judge was measured with in Homework 5
+            # (analysis/helpers/scale.py). DocETL's default forces a named
+            # function call, which the Muse Spark endpoint rejects, and its
+            # default token ceiling is spent on reasoning before the verdict.
+            output={
+                "schema": {"critique": "string", "result": "string"},
+                "mode": "structured_output",
+            },
+            litellm_completion_kwargs={"max_tokens": 24000},
         )
         pipeline = Pipeline(
             name="cartwheel_monitor",

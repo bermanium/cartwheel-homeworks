@@ -25,6 +25,7 @@ hw4-video-script.md
 hw5-progress.md
 hw5-video-script.md
 hw6-video-script.md
+hw7-progress.md hw7-video-script.md
 
 # Local conversation state and scenario/replay run outputs.
 .sessions.db
@@ -46,3 +47,6 @@ scenarios/.*_conversations.jsonl
 # alongside it makes the review app runnable from a fresh clone (the trace
 # export it derives from is already tracked and larger).
 analysis/state/.langfuse_sync.json
+
+# HW7 monitor local output (verdict cache, per-run summaries); uploaded as a CI artifact, not committed.
+monitoring/output/

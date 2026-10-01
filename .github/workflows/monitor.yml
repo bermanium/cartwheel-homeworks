@@ -1,0 +1,42 @@
+name: monitor
+
+on:
+  schedule:
+    # Daily, at an off-peak minute (GitHub runs schedules in UTC).
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+
+jobs:
+  monitor:
+    name: monitor the previous 24 hours
+    runs-on: ubuntu-latest
+    env:
+      LANGFUSE_PUBLIC_KEY: ${{ secrets.LANGFUSE_PUBLIC_KEY }}
+      LANGFUSE_SECRET_KEY: ${{ secrets.LANGFUSE_SECRET_KEY }}
+      LANGFUSE_HOST: ${{ vars.LANGFUSE_HOST }}
+      # The frozen Homework 5 judge's provider key. The job reads traces that
+      # already exist, so it needs no Cartwheel model key. The judge reaches
+      # an OpenAI-compatible endpoint that is not OpenAI's own, so the address
+      # travels with the key; it is not a credential and stays a variable.
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      OPENAI_BASE_URL: ${{ vars.OPENAI_BASE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: astral-sh/setup-uv@v5
+      - run: uv sync
+
+      # Samples, judges, corrects and writes scores. A window with no eligible
+      # conversations records a zero count and exits without calling the judge.
+      - name: Run the monitor
+        run: uv run python -m monitoring.run --last-hours 24
+
+      # Always upload: when the job fails, the output is how to find out why.
+      - name: Upload the monitoring output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitor-output
+          path: monitoring/output
+          if-no-files-found: warn

@@ -155,6 +155,12 @@ def model_settings_for(model: Any) -> ModelSettings:
             reasoning={"effort": "high", "summary": "detailed"},
             include_usage=True,
         )
+    if model_id.startswith("openai/"):
+        # The OpenAI-compatible endpoint serving Muse Spark resets connections
+        # under load, and one reset call used to fail the whole conversation.
+        # LiteLLM retries the same model call in place, so a retry adds no
+        # session and changes nothing the agent sees or says.
+        return ModelSettings(extra_args={"num_retries": 3})
     return ModelSettings()
 
 

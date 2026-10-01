@@ -79,8 +79,12 @@ def run_scenario(
     user_id = tuple_.get("user_id", DEFAULT_USERS.get(role, 1))
     turns: list[dict[str, str]] = []
     started = time.time()
+    session_id = None
     try:
         session = _post(f"{base_url}/sessions", {"user_id": user_id, "role": role})
+        # Kept on the result so a monitoring period can pick out the exact
+        # attempt recorded here when a retry left earlier sessions in the traces.
+        session_id = session["session_id"]
         messages = [scenario["opening_message"]]
         followups = scenario.get("followups") or []
         # Every followup is an exact user utterance. The scenario skill forbids
@@ -108,6 +112,7 @@ def run_scenario(
         "model": model,
         "status": status,
         "error": error,
+        "session_id": session_id,
         "turns": turns,
         "expected": scenario["expected"],
         "duration_s": round(time.time() - started, 2),
