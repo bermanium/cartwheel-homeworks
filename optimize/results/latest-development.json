@@ -1,0 +1,192 @@
+{
+  "candidate": "starting",
+  "case_count": 8,
+  "cases": [
+    {
+      "case_id": "e-001",
+      "expected_write": false,
+      "failure_modes": [
+        "judge:unsolicited_content"
+      ],
+      "latencies_seconds": [
+        39.9877
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "judge:unsolicited_content"
+          ],
+          "final_reply": "Got it \u2014 a torn dry bag is frustrating. I'll look up your order to check refund options.\nI found your dry bag order \u2014 now I'll pull up the full details to confirm it's eligible for a refund.\nI see your order is marked as refund-eligible, so now I'll check if it's still within the return window and why.\nYou're within the return window \u2014 now I'll fetch the store's return policy to confirm the details for a damaged item.\nGood news \u2014 you're eligible for a refund under the store's 21-day return window, so I'm about to issue it for your torn dry bag.\nYes \u2014 I\u2019ve issued your refund!\n\nFor order **8594** (dry bag from Meridian Cycles - $45.50), the item is refund-eligible and you\u2019re still within the return window \u2014 delivered 3 days ago, with 18 of 21 days remaining.\n\nMeridian Cycles accepts returns within 21 days of delivery instead of the Cartwheel default of 30 days (policy: `store-meridian-cycles-policy`).\n\nYour refund of **$45.50** was auto-approved and will go back to your original payment method in 5 to 10 business days. Refund ID is 575.\n\nSorry it arrived torn \u2014 let me know if you want help finding a replacement!",
+          "judge_reasons": {
+            "unsolicited_content": "User asked: 'I got a dry bag from Meridian Cycles and it has a tear in it. Can I get a refund?' The agent completed that request - issued $45.50 refund for order 8594 and reported eligibility, window, and refund ID. That completes the request (State 1: Settled). The final sentence adds: 'let me know if you want help finding a replacement!' This is an offer to perform an action the user did not ask for, made after the request was already settled. Per definitions, closing with an offer of further help once the request has been answered is a Fail whether generic or specific. It is not a required escalation, not a continuation of an open request, and not a detail of the same policy/record. The earlier narrations of lookups ('I'll look up your order...') are explicitly not unsolicited per the spec."
+          },
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-002",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        8.8926
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll search for your Walnut Vase order to check its shipping status.\nYes! Your Walnut Vase order (order #830) has shipped \u2014 it went out on June 30th.\n\nIt's on its way but hasn't been marked as delivered yet.",
+          "judge_reasons": {
+            "unsolicited_content": "User asked: \"Has my Walnut Vase order shipped yet?\" - a single status question. Agent reply has three sentences: 1) \"I'll search for your Walnut Vase order to check its shipping status.\" - This is narration of the next lookup the agent is about to perform, which the definitions explicitly state is NOT unsolicited content. 2) \"Yes! Your Walnut Vase order (order #830) has shipped \u00197 it went out on June 30th.\" - Direct answer to the question using tool result (shipped_at 2026-06-30, status shipped). 3) \"It's on its way but hasn't been marked as delivered yet.\" - Further relevant detail of the same order record (delivered_at null), which is defined as part of answering, not introducing a new topic. No offer to act, no escalation offer, no advice/tips, no new topic, and no closing offer of further help. Request is settled with answer and no extra offer follows."
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-004",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        7.4765
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up your orders to find the Matte Wooden Train and see what you paid.\nYou paid **$63.25** for the Matte Wooden Train \u2014 that was order 3149.",
+          "judge_reasons": {
+            "unsolicited_content": "User asked: \"What did I pay for the Matte Wooden Train?\" Agent's first sentence \"I'll look up your orders to find the Matte Wooden Train and see what you paid.\" is narration of the next lookup the agent is about to perform, which the definitions explicitly state is NOT unsolicited content. Agent's second sentence \"You paid **$63.25** for the Matte Wooden Train \u000414 that was order 3149.\" directly answers the question asked, reporting the result of the requested lookup with the total_usd 63.25 from the tool result. Including the order ID is a relevant detail of the same record the user asked about, not a new topic. No sentence offers an action, offers escalation, volunteers advice, introduces a new topic, or closes with an offer of further help. Request is settled (state 1) with no additional offer, so no FAIL condition is met."
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-007",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        18.1717
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up order 1082 to find out how much the shopper paid and check its details.\nGot the order total \u2014 now I'll verify whether it's still within the return window.\nFor order **1082** from Northwind Books:\n\n* **Amount paid:** $104.25\n* **Can it still be returned?** Yes \u2014 it's delivered and still within the return window, with **4 days remaining** of the 45-day window.\n\nPolicy: `store-northwind-books-policy`",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-008",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        19.996
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up order 8594 to get its total and current status for you.\nI can't share details for order 8594 since it's not in your store's orders.\n\nI can look up status and totals for orders in your store (store 1) \u2014 want me to list your recent orders to find the one you need?",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-009",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        68.6107
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up your order for the Everyday Atlas so I can check its return options.\nFound your order \u2014 now I'll verify the details, check the return window, and pull the returns policy.\nGood news \u2014 your order is still within its return window. Since the refund is over the auto-approval limit, I'll pull the full policies to confirm the next steps.\nYour refund for $104.25 is above the $100 automatic approval limit, so I'll escalate it for human review.\nGood news \u2014 you\u2019re still in time to return it!\n\nI found your order #1082 for the Everyday Atlas from Northwind Books ($104.25, delivered May 21). It\u2019s still returnable with 4 days left in its 45-day return window [store-northwind-books-policy].\n\nAbout the refund: approved refunds go back to your original payment method in 5 to 10 business days [cw-refunds]. Since your refund is $104.25, which is over the $100 amount that I can approve automatically, I\u2019ve sent it for human review [cw-refunds].\n\nI opened ticket #151 for you and a human agent will follow up within 24 hours to complete your return and refund.",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-011",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        7.7272
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll search the catalog for Bluetooth speakers from Cascade Audio under $60 to see what's available.\nYes! We have one from Cascade Audio under $60:\n\n**Handmade Bluetooth Speaker** \u2014 $56.75\n\nWant me to pull up more details or help you with ordering?",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-012",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        60.8376
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll search the catalog for jam trio options to find the cheapest one.\nI'll try the product search again with different parameters to work around the input error.\nI'll search for jam trios again without filtering by store to find all available options.\nThe cheapest jam trio I found is the **Modern Jam Trio for $20.75**.",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    }
+  ],
+  "cost_per_100_conversations_usd": 0.91075,
+  "cost_usd": 0.07286,
+  "created_at": "2026-10-02T21:19:35.097979+00:00",
+  "evaluated_case_runs": 8,
+  "git_commit": "556bf91443c2b789548f8c1e35082030666b055e",
+  "input_tokens": 55452,
+  "median_latency_seconds": 19.0838,
+  "model": "openai/rl-muse-spark-1-3-sglang-playground",
+  "output_tokens": 17408,
+  "price_date": "2026-10-02",
+  "prompt_sha256_12": "cbfd4a7cec7b",
+  "schema_version": 1,
+  "score": 0.875,
+  "split": "development",
+  "test_plan_sha256": null,
+  "write_pass_5": null
+}

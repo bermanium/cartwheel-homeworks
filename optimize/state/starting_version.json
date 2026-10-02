@@ -1,0 +1,18 @@
+{
+  "comparison_models": [
+    "openai/rl-muse-spark-1-1-playground",
+    "openai/rl-muse-spark-1-2-playground",
+    "openai/rl-muse-spark-1-3-sglang-playground"
+  ],
+  "created_at": "2026-10-02T21:20:09.921851+00:00",
+  "development_model": "openai/rl-muse-spark-1-3-sglang-playground",
+  "development_result": "/Users/daberman/Desktop/AI Evals Course/cartwheel-homeworks/optimize/results/latest-development.json",
+  "development_score": 0.875,
+  "git_commit": "556bf91443c2b789548f8c1e35082030666b055e",
+  "grader_sha256": "0ed9960b0a47dc9f767203cd6f44823d2ce19bb0b62083371e895e40513463b2",
+  "kind": "starting",
+  "model_selection_sha256": "64d3a77357a397167784a21f8a866d3c941dd90f978c66fd491ba9ed6e8cf68d",
+  "prompt_sha256_12": "cbfd4a7cec7b",
+  "split_membership_sha256": "8ebfe190ef30f042a5b9a3354e9872724e53adaaa7cde38f6b134818c3eae3a8",
+  "write_pass_5": null
+}
