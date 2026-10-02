@@ -1,0 +1,12 @@
+{
+  "failure_mode": "unsolicited_content",
+  "source": "Homework 5 human labels, 108 support conversations (analysis/state/hw5_labels/unsolicited_content.jsonl)",
+  "prevalence": 0.519,
+  "requirement": "RESP-6",
+  "example_trace_ids": [
+    "22615bb0f38ec5116707b20ed724cc9c",
+    "cd5a26ef5604620c2fee9817e2bee636",
+    "484960e70fad3d22ea92badf724db9f2"
+  ],
+  "why_agent_can_change_it": "In all three traces the agent offers a human escalation that no Cartwheel policy requires, and all three orders are under the $100 threshold. support-0010 (22615bb0): a $64.75 cutting board outside the store's 14-day window; the agent offers to escalate to a human to ask for an exception. support-0210 (cd5a26ef): a merchant asks for a $36.25 order's status; after reporting it delivered, the agent offers a ticket for a missing delivery nobody reported. support-0049 (484960e7): the agent correctly declines to show another store's order, then offers to open a ticket for a human to follow up. Each offer is a sentence the agent chose to add after the request was settled or correctly refused, so the system prompt (when to offer a human), the escalate_to_human tool description, or a check on the reply in the harness can each change it."
+}
