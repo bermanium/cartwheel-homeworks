@@ -51,3 +51,5 @@ analysis/state/.langfuse_sync.json
 
 # HW7 monitor local output (verdict cache, per-run summaries); uploaded as a CI artifact, not committed.
 monitoring/output/
+hw8-progress.md
+hw8-video-script.md

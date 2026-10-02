@@ -62,6 +62,13 @@ JUDGE_PROMPT_SUFFIX = (
 
 
 def run_frozen_judge(judge: dict[str, Any], content: str) -> str:
+    """Score one trace with a frozen judge. Returns "pass" or "fail"."""
+    return run_frozen_judge_with_critique(judge, content)[0]
+
+
+def run_frozen_judge_with_critique(
+    judge: dict[str, Any], content: str
+) -> tuple[str, str]:
     """Score one trace with a frozen judge, under the Homework 5 contract.
 
     Two settings are not DocETL defaults and are not optional here. The
@@ -71,8 +78,9 @@ def run_frozen_judge(judge: dict[str, Any], content: str) -> str:
     content at all. Homework 5 established both. Dropping either does not
     degrade the judge, it stops it returning anything.
 
-    Returns "pass" or "fail". Raises on a malformed result: an unparseable
-    verdict is an infrastructure failure, never a silent Fail.
+    Returns "pass" or "fail" and the judge's critique. Raises on a malformed
+    result: an unparseable verdict is an infrastructure failure, never a
+    silent Fail.
     """
     from docetl.api import Dataset, MapOp, Pipeline, PipelineOutput, PipelineStep
 
@@ -123,7 +131,7 @@ def run_frozen_judge(judge: dict[str, Any], content: str) -> str:
         raise ValueError(f"judge result must be Pass or Fail, got {verdict!r}")
     if not isinstance(critique, str) or not critique.strip():
         raise ValueError("judge result needs a critique")
-    return "pass" if verdict == "Pass" else "fail"
+    return ("pass" if verdict == "Pass" else "fail"), critique
 
 
 def _trial_runner(
