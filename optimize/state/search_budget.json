@@ -30,7 +30,17 @@
       "calls": 8,
       "label": "loop-3-act-on-announcement-with-esc5-rerun",
       "reserved_at": "2026-10-05T21:00:23.865109+00:00"
+    },
+    {
+      "calls": 8,
+      "label": "loop-4-finish-announced-step",
+      "reserved_at": "2026-10-05T21:15:58.279576+00:00"
+    },
+    {
+      "calls": 8,
+      "label": "loop-4-finish-announced-step-rerun",
+      "reserved_at": "2026-10-05T21:45:41.486237+00:00"
     }
   ],
-  "used_calls": 48
+  "used_calls": 64
 }
