@@ -16,11 +16,14 @@ The mapping from concept to SDK primitive, stated once: the loop is
 
 from __future__ import annotations
 
+import functools
 import hashlib
 import json
+import re
 from typing import Any
 
 from agents import Agent, ModelSettings, RunContextWrapper, function_tool
+from agents.items import ModelResponse
 
 from agent import db
 from agent import tools as hw_tools
@@ -510,6 +513,101 @@ def _tools_with_defenses(role: str) -> list[Any]:
     return [defended_refund if tool is issue_refund else tool for tool in TOOLS_BY_ROLE[role]]
 
 
+# ---------------------------------------------------------------------------
+# Harness: finish an announced step (Homework 8, improve loop attempt 4).
+# The prompt requires a one-sentence announcement before every tool call. In
+# refund conversations Muse Spark sometimes sends the announcement and ends
+# the turn without the call, so the user gets "I'll check the return window
+# next." and nothing else. When a final reply is only such an announcement,
+# the harness asks the model to continue instead of ending the turn.
+# ---------------------------------------------------------------------------
+
+_ANNOUNCED_STEP = re.compile(
+    r"\b(i'?ll|i will|i'?m going to|let me|i need to)\b[^.?!]*"
+    r"\b(check|look|pull|fetch|verify|confirm|search|find|issue|open|escalate|get)\b"
+    r"[^.?!]*[.!]?$",
+    re.IGNORECASE,
+)
+_CONTINUE = (
+    "[harness] Your last message announced a step but did not take it. Make "
+    "the tool call you described now, then answer the user."
+)
+_MAX_CONTINUATIONS = 2
+_SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
+
+
+def _final_text(response: ModelResponse) -> str | None:
+    """The reply text of a response with no tool call, else None."""
+    if any(getattr(item, "type", None) == "function_call" for item in response.output):
+        return None
+    parts = [
+        getattr(part, "text", "") or ""
+        for item in response.output
+        if getattr(item, "type", None) == "message"
+        for part in item.content
+    ]
+    return "".join(parts).strip() or None
+
+
+def ends_on_announced_step(text: str) -> bool:
+    """Whether a reply's last sentence announces a lookup instead of answering."""
+    sentences = _SENTENCE_END.split(text.strip())
+    return bool(sentences) and _ANNOUNCED_STEP.search(sentences[-1].strip()) is not None
+
+
+class _FinishAnnouncedStep:
+    """Mixin: if the model's final reply is only an announced step, continue.
+
+    A mixin rather than a wrapper, so the agent's model keeps its provider
+    type (code and tests that inspect ``agent.model`` see a LitellmModel).
+    The announcement stays in the reply; the continuation is appended to it.
+    Streamed responses are not checked; the CLI, the server, and the replay
+    harness all call Runner.run.
+    """
+
+    async def get_response(self, system_instructions, input, *args, **kwargs):
+        response = await super().get_response(system_instructions, input, *args, **kwargs)
+        history = [{"role": "user", "content": input}] if isinstance(input, str) else list(input)
+        output, usage, continued = list(response.output), response.usage, False
+        for _ in range(_MAX_CONTINUATIONS):
+            text = _final_text(response)
+            if text is None or not ends_on_announced_step(text):
+                break
+            history = history + response.to_input_items() + [
+                {"role": "user", "content": _CONTINUE}
+            ]
+            response = await super().get_response(system_instructions, history, *args, **kwargs)
+            output += list(response.output)
+            usage.add(response.usage)
+            continued = True
+        if not continued:
+            return response
+        return ModelResponse(output=output, usage=usage, response_id=response.response_id)
+
+
+def with_announced_step_check(resolved: Any) -> Any:
+    """Return the resolved model with the announced-step check attached.
+
+    OpenAI models given by name are left as names (the SDK resolves them at
+    run time, and building the agent needs no API key); every course model
+    run in Homework 8 is a LitellmModel.
+    """
+    from agents.extensions.models.litellm_model import LitellmModel
+
+    if isinstance(resolved, LitellmModel):
+        return _announced_step_litellm_class()(
+            model=resolved.model, base_url=resolved.base_url, api_key=resolved.api_key
+        )
+    return resolved
+
+
+@functools.cache
+def _announced_step_litellm_class() -> type:
+    from agents.extensions.models.litellm_model import LitellmModel
+
+    return type("AnnouncedStepLitellmModel", (_FinishAnnouncedStep, LitellmModel), {})
+
+
 def build_agent(
     ctx: AuthContext,
     model: str | None = None,
@@ -549,7 +647,7 @@ def build_agent(
             name="cartwheel-support",
             instructions=render_system_prompt(ctx, prompt_template),
             tools=TOOLS_BY_ROLE[ctx.role],
-            model=resolved,
+            model=with_announced_step_check(resolved),
             model_settings=model_settings_for(resolved),
         )
 
@@ -560,7 +658,7 @@ def build_agent(
         name="cartwheel-support",
         instructions=render_system_prompt(ctx, prompt_template),
         tools=_tools_with_defenses(ctx.role),
-        model=resolved,
+        model=with_announced_step_check(resolved),
         model_settings=model_settings_for(resolved),
         input_guardrails=[injection_input_guardrail],
         output_guardrails=[link_output_guardrail],
