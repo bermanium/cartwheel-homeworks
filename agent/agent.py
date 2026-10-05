@@ -16,15 +16,11 @@ The mapping from concept to SDK primitive, stated once: the loop is
 
 from __future__ import annotations
 
-import functools
 import hashlib
 import json
-import re
 from typing import Any
 
 from agents import Agent, ModelSettings, RunContextWrapper, function_tool
-from agents.models.interface import Model
-from agents.models.multi_provider import MultiProvider
 
 from agent import db
 from agent import tools as hw_tools
@@ -511,174 +507,6 @@ def _tools_with_defenses(role: str) -> list[Any]:
     return [defended_refund if tool is issue_refund else tool for tool in TOOLS_BY_ROLE[role]]
 
 
-# ---------------------------------------------------------------------------
-# Harness: check the final reply before it leaves (Homework 8, RESP-6).
-# The prompt asks the agent not to add unrequested offers; this enforces it on
-# the reply's closing sentences, which is where the offers sit.
-# ---------------------------------------------------------------------------
-
-# A closing offer of further help once the request is settled.
-_CLOSING_OFFER = re.compile(
-    r"^(is there )?anything else (i can|you need|i could)"
-    r"|^(please )?(let me know|feel free to (reach out|ask|let me know))\b.*"
-    r"\b(anything else|any other|anything more|further help|more help|other questions)"
-    r"|^let me know if you (want|need|would like|'d like) (help|me to (check|look|find|help))"
-    r"|^(or )?(i can|i'?m happy to|happy to) help with anything else"
-    r"|^(just )?let me know[.!]?$"
-    r"|^hope (this|that) helps",
-    re.IGNORECASE,
-)
-# An offer of a human, a ticket, or an exception (only stripped when the agent
-# did not actually escalate, so a required escalation's explanation stays).
-_OFFER_MARKER = re.compile(
-    r"\b(i can|i could|i'?m happy to|happy to|if you'?d like|if you want|"
-    r"would you like( me)? to|want me to|just let me know|let me know if)\b",
-    re.IGNORECASE,
-)
-_ESCALATION_TERM = re.compile(
-    r"\b(human|escalat\w*|ticket|exception|specialist|support (team|agent)|connect you)\b",
-    re.IGNORECASE,
-)
-# A confirmation question about the action the user asked for is not an offer.
-_CONFIRMATION = re.compile(r"\b(go ahead|proceed|confirm)\b", re.IGNORECASE)
-_SENTENCE_END = re.compile(r"(?<=[.!?])\s+")
-_DASH = " \u2014 "
-
-
-def _is_unrequested_offer(sentence: str, escalated: bool) -> bool:
-    text = sentence.strip().strip("*_ ")
-    if not text or _CONFIRMATION.search(text):
-        return False
-    if _CLOSING_OFFER.search(text):
-        return True
-    return (
-        not escalated
-        and _OFFER_MARKER.search(text) is not None
-        and _ESCALATION_TERM.search(text) is not None
-    )
-
-
-def strip_unrequested_offers(reply: str, escalated: bool) -> str:
-    """Drop unrequested offers from the end of a final reply.
-
-    Works backwards from the last sentence and stops at the first sentence
-    that is not an offer, so offers in the middle of a reply are left alone.
-    Returns the reply unchanged when nothing matches, and never returns an
-    empty reply.
-    """
-    paragraphs = reply.rstrip().split("\n\n")
-    changed = False
-    while paragraphs:
-        sentences = _SENTENCE_END.split(paragraphs[-1].rstrip())
-        while sentences:
-            last = sentences[-1]
-            # "Sorry it arrived torn — let me know if you want help...": keep
-            # the clause before the dash when only the clause after it offers.
-            head, dash, tail = last.rpartition(_DASH)
-            if (
-                dash
-                and head.strip()
-                and _is_unrequested_offer(tail, escalated)
-                and not _is_unrequested_offer(head, escalated)
-            ):
-                sentences[-1] = head.rstrip(" ,;") + "."
-                changed = True
-                break
-            if not _is_unrequested_offer(last, escalated):
-                break
-            sentences.pop()
-            changed = True
-        if sentences:
-            paragraphs[-1] = " ".join(sentences)
-            break
-        paragraphs.pop()
-    if not changed or not paragraphs:
-        return reply
-    return "\n\n".join(paragraphs)
-
-
-def _called_escalate(items: Any) -> bool:
-    for item in items if isinstance(items, list) else []:
-        kind = item.get("type") if isinstance(item, dict) else getattr(item, "type", None)
-        name = item.get("name") if isinstance(item, dict) else getattr(item, "name", None)
-        if kind == "function_call" and name == "escalate_to_human":
-            return True
-    return False
-
-
-def _check_final_reply(response: Any, input: Any) -> Any:
-    """Apply the offer check to a response with no tool call, in place."""
-    if any(getattr(item, "type", None) == "function_call" for item in response.output):
-        return response
-    escalated = _called_escalate(input)
-    for index, item in enumerate(response.output):
-        if getattr(item, "type", None) != "message":
-            continue
-        content = []
-        for part in item.content:
-            text = getattr(part, "text", None)
-            if text:
-                part = part.model_copy(update={"text": strip_unrequested_offers(text, escalated)})
-            content.append(part)
-        response.output[index] = item.model_copy(update={"content": content})
-    return response
-
-
-class _ReplyCheck:
-    """Mixin: check the final reply after the model's own get_response.
-
-    A mixin rather than a wrapper, so the agent's model keeps its provider
-    type (code and tests that inspect ``agent.model`` see a LitellmModel).
-    Streamed responses are not checked; the CLI, the server, and the replay
-    harness all call Runner.run.
-    """
-
-    async def get_response(self, system_instructions, input, *args, **kwargs):
-        response = await super().get_response(system_instructions, input, *args, **kwargs)
-        return _check_final_reply(response, input)
-
-
-class _LazyReplyCheckModel(Model):
-    """An OpenAI model given by name, resolved on first use as the SDK does,
-    so building the agent still needs no API key."""
-
-    def __init__(self, name: str) -> None:
-        self.name = name
-        self._inner: Model | None = None
-
-    def _model(self) -> Model:
-        if self._inner is None:
-            self._inner = MultiProvider().get_model(self.name)
-        return self._inner
-
-    async def get_response(self, system_instructions, input, *args, **kwargs):
-        response = await self._model().get_response(system_instructions, input, *args, **kwargs)
-        return _check_final_reply(response, input)
-
-    def stream_response(self, *args, **kwargs):
-        return self._model().stream_response(*args, **kwargs)
-
-
-def with_reply_check(resolved: Any) -> Any:
-    """Return the resolved model with the final-reply check attached."""
-    if isinstance(resolved, str):
-        return _LazyReplyCheckModel(resolved)
-    from agents.extensions.models.litellm_model import LitellmModel
-
-    if isinstance(resolved, LitellmModel):
-        return _reply_check_litellm_class()(
-            model=resolved.model, base_url=resolved.base_url, api_key=resolved.api_key
-        )
-    return resolved
-
-
-@functools.cache
-def _reply_check_litellm_class() -> type:
-    from agents.extensions.models.litellm_model import LitellmModel
-
-    return type("ReplyCheckLitellmModel", (_ReplyCheck, LitellmModel), {})
-
-
 def build_agent(
     ctx: AuthContext,
     model: str | None = None,
@@ -718,7 +546,7 @@ def build_agent(
             name="cartwheel-support",
             instructions=render_system_prompt(ctx, prompt_template),
             tools=TOOLS_BY_ROLE[ctx.role],
-            model=with_reply_check(resolved),
+            model=resolved,
             model_settings=model_settings_for(resolved),
         )
 
@@ -729,7 +557,7 @@ def build_agent(
         name="cartwheel-support",
         instructions=render_system_prompt(ctx, prompt_template),
         tools=_tools_with_defenses(ctx.role),
-        model=with_reply_check(resolved),
+        model=resolved,
         model_settings=model_settings_for(resolved),
         input_guardrails=[injection_input_guardrail],
         output_guardrails=[link_output_guardrail],
