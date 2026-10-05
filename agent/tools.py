@@ -390,7 +390,10 @@ def check_return_eligibility(ctx: AuthContext, order_id: int) -> dict[str, Any]:
         "days_since_delivery": int | None, "days_remaining": int | None,
         "policy_id": str, "as_of": str}. `window_source` is "store_override"
         or "platform_default", and `policy_id` names the document that sets
-        the window, so the answer can be cited.
+        the window, so the answer can be cited. A delivered order past its
+        window also carries "exception_available": False and a "note" that
+        the window is final, because no policy provides an exception and the
+        agent used to offer a human review of one (RESP-6).
         If no order has this id: {"ok": False, "error": "not_found", ...}.
         If the order is outside the caller's scope: permission_denied.
     """
@@ -421,6 +424,7 @@ def check_return_eligibility(ctx: AuthContext, order_id: int) -> dict[str, Any]:
     )
 
     days_since = (as_of - order.delivered_at).days if order.delivered_at else None
+    window_closed = False
     if order.status != "delivered" or order.delivered_at is None:
         reason = (
             f"order #{order_id} has status '{order.status}' and has not been "
@@ -435,12 +439,13 @@ def check_return_eligibility(ctx: AuthContext, order_id: int) -> dict[str, Any]:
         )
     else:
         days_remaining = 0
+        window_closed = True
         reason = (
             f"delivered {days_since} days ago on {order.delivered_at.isoformat()}, "
             f"past the {window_days}-day window"
         )
 
-    return {
+    result = {
         "ok": True,
         "order_id": order_id,
         "returnable": returnable,
@@ -452,3 +457,10 @@ def check_return_eligibility(ctx: AuthContext, order_id: int) -> dict[str, Any]:
         "policy_id": f"store-{store.slug}-policy" if override is not None else "cw-returns",
         "as_of": as_of.isoformat(),
     }
+    if window_closed:
+        result["exception_available"] = False
+        result["note"] = (
+            "The return window is final. No Cartwheel policy provides an "
+            "exception or a human review of a closed window, so do not offer one."
+        )
+    return result
