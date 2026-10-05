@@ -1,0 +1,188 @@
+{
+  "candidate": "loop-2-esc5-before-refund",
+  "case_count": 8,
+  "cases": [
+    {
+      "case_id": "e-001",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        232.9613
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll locate your dry bag order to check the refund options.\nI found your order, so I'll pull up the full details to verify refund eligibility.\nI'll look up the returns policy to confirm how defective items are handled.\nI'll fetch the full refund policy to confirm the exact requirements.\nYour order is eligible for a refund, so I'll now issue the $45.50 refund for the torn dry bag.\nI've issued a refund of $45.50 for your dry bag from Meridian Cycles (order 8594).\n\nPer cw-refunds, it will go back to your original payment method and arrive in 5 to 10 business days.",
+          "judge_reasons": {
+            "unsolicited_content": "User asked: \"I got a dry bag from Meridian Cycles and it has a tear in it. Can I get a refund?\" The agent's replies stay within that request. The first four sentences - \"I'll locate your dry bag order to check the refund options.\" / \"I found your order, so I'll pull up the full details to verify refund eligibility.\" / \"I'll look up the returns policy to confirm how defective items are handled.\" / \"I'll fetch the full refund policy to confirm the exact requirements.\" - are narration of the next lookup the agent is about to perform, which is explicitly NOT unsolicited content. \"Your order is eligible for a refund, so I'll now issue the $45.50 refund for the torn dry bag.\" proposes the exact action the user asked for, which is responsive, not unsolicited. \"I've issued a refund of $45.50 for your dry bag from Meridian Cycles (order 8594). Per cw-refunds, it will go back to your original payment method and arrive in 5 to 10 business days.\" reports the result of the requested action with det"
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-002",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        59.9569
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up your Walnut Vase order to check its shipping status.\nYes \u2014 your Walnut Vase order has shipped on June 30.",
+          "judge_reasons": {
+            "unsolicited_content": "User asked: 'Has my Walnut Vase order shipped yet?' Agent replied in two sentences: 'I'll look up your Walnut Vase order to check its shipping status.' and 'Yes \u2014 your Walnut Vase order has shipped on June 30.' The first is narration of the next lookup the agent is about to perform, which is explicitly NOT unsolicited content. The second directly answers the question asked and reports the result of the requested lookup (shipped_at 2026-06-30, status shipped). No offer to act, escalate, advise, introduce a new topic, or close with further help was made. Request is settled (state 1) with no added offer."
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-004",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        43.9475
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll search your orders for the Matte Wooden Train to find what you paid.\nYou paid $63.25 for the Matte Wooden Train.",
+          "judge_reasons": {
+            "unsolicited_content": "User asked: 'What did I pay for the Matte Wooden Train?' This is a single price lookup. Agent's first sentence 'I'll search your orders for the Matte Wooden Train to find what you paid.' is narration of its next lookup, which is explicitly NOT unsolicited content. Agent's final sentence 'You paid $63.25 for the Matte Wooden Train.' reports the result of the requested lookup with the exact detail asked for. No offer to perform unrequested action, no escalation offer, no advice/tips, no new topic, and no closing offer of further help. Request was settled by the answer and agent stopped."
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-007",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        85.9065
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up order 1082 to find how much was paid and check its return status.\nI have the payment total, so now I'll check whether this order can still be returned.\nThey paid **$104.25** for order 1082.\n\nYes, it can still be returned \u2014 4 days remain in the 45-day window (store-northwind-books-policy).",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-008",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        40.6405
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up order 8594 to get its total and status.\nSorry, I can't view order 8594 \u2014 it's not associated with your store, so I don't have access to its total or status.",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-009",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        167.5337
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up your order for the Everyday Atlas to check its return options.\nI found your order, so now I'll pull up its full details to check refund eligibility.\nI'll check whether your return window is still open and look up the return policy.\nYour return window is still open, so I'll fetch the store's return policy to confirm the details before proceeding.\nI need to check the refund approval rules before issuing your refund, so I'll search the help center for the threshold.\nI need the full refund policy text to confirm the approval threshold for your amount, so I'll fetch it next.\nYour refund amount is above the auto-approval limit, so I need to escalate this to a human for review before any refund can happen.\nYour Everyday Atlas order 1082 is still returnable, with 4 days left in the 45-day window under store-northwind-books-policy.\n\nBecause the $104.25 total is over $100, under cw-refunds it needs human review before a refund can move forward. I've opened ticket 151 and a human will follow up.",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-011",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        17.5074
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll search the catalog for Cascade Audio bluetooth speakers under $60.\nYes \u2014 we have the Handmade Bluetooth Speaker from Cascade Audio for $56.75.",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-012",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        26.7884
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll search the catalog for jam trio products to find the cheapest option.\nThe cheapest jam trio is the Modern Jam Trio for $20.75.",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    }
+  ],
+  "cost_per_100_conversations_usd": 1.004675,
+  "cost_usd": 0.080374,
+  "created_at": "2026-10-05T18:42:43.727327+00:00",
+  "evaluated_case_runs": 8,
+  "git_commit": "43387ea133f5be2d0b22b4d65d64d29a83af8c6f",
+  "input_tokens": 64381,
+  "median_latency_seconds": 51.9522,
+  "model": "openai/rl-muse-spark-1-3-sglang-playground",
+  "output_tokens": 15993,
+  "price_date": "2026-10-02",
+  "prompt_sha256_12": "96e4361d8626",
+  "schema_version": 1,
+  "score": 1.0,
+  "split": "development",
+  "test_plan_sha256": null,
+  "write_pass_5": null
+}

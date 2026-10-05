@@ -1,5 +1,26 @@
 {
   "maximum_calls": 150,
-  "reservations": [],
-  "used_calls": 0
+  "reservations": [
+    {
+      "calls": 8,
+      "label": "loop-baseline",
+      "reserved_at": "2026-10-05T17:47:40.940137+00:00"
+    },
+    {
+      "calls": 8,
+      "label": "loop-1-act-on-announcement",
+      "reserved_at": "2026-10-05T18:10:45.037679+00:00"
+    },
+    {
+      "calls": 8,
+      "label": "loop-2-esc5-before-refund",
+      "reserved_at": "2026-10-05T18:28:56.643139+00:00"
+    },
+    {
+      "calls": 8,
+      "label": "loop-2-esc5-before-refund-rerun",
+      "reserved_at": "2026-10-05T19:05:39.199704+00:00"
+    }
+  ],
+  "used_calls": 32
 }
