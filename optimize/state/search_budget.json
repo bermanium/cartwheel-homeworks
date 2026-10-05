@@ -20,7 +20,17 @@
       "calls": 8,
       "label": "loop-2-esc5-before-refund-rerun",
       "reserved_at": "2026-10-05T19:05:39.199704+00:00"
+    },
+    {
+      "calls": 8,
+      "label": "loop-3-act-on-announcement-with-esc5",
+      "reserved_at": "2026-10-05T20:40:08.213379+00:00"
+    },
+    {
+      "calls": 8,
+      "label": "loop-3-act-on-announcement-with-esc5-rerun",
+      "reserved_at": "2026-10-05T21:00:23.865109+00:00"
     }
   ],
-  "used_calls": 32
+  "used_calls": 48
 }
