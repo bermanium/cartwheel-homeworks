@@ -1,0 +1,5 @@
+configuration,name,parent,git_commit,model,score,write_pass_5,cost_per_100_conversations_usd,median_latency_seconds,dominated
+1,starting-version-model-1,,556bf91443c2b789548f8c1e35082030666b055e,openai/rl-muse-spark-1-1-playground,0.25,,0.3052,11.4042,False
+2,starting-version-model-2,,556bf91443c2b789548f8c1e35082030666b055e,openai/rl-muse-spark-1-2-playground,0.0,,0.399525,12.5465,True
+3,starting-version-model-3,,556bf91443c2b789548f8c1e35082030666b055e,openai/rl-muse-spark-1-3-sglang-playground,0.75,,0.67775,42.908,False
+4,final-version-model-3,starting-version-model-3,611e858231dc10314cd64656c81b70653f45cb6c,openai/rl-muse-spark-1-3-sglang-playground,1.0,,1.11455,61.2793,False

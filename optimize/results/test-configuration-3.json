@@ -1,0 +1,110 @@
+{
+  "candidate": "starting-version-model-3",
+  "case_count": 4,
+  "cases": [
+    {
+      "case_id": "e-003",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        47.5959
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up the return policy for Northwind Books to find your book return window.\nThat search found the store policy; now I'll pull its full text to confirm the exact terms.\nYou have **45 days from delivery** to return a book from Northwind Books.\n\nThat store extends the normal Cartwheel 30-day window, and the store window takes precedence for its orders.\n\n*Policy: `store-northwind-books-policy`*\n",
+          "judge_reasons": {
+            "unsolicited_content": "User asked: \"How many days do I have to return a book I bought from Northwind Books?\" Request is settled when agent answers the window. Agent sentences: \"I'll look up the return policy for Northwind Books to find your book return window.\" and \"That search found the store policy; now I'll pull its full text to confirm the exact terms.\" are narration of the next lookup mid-task, which the definitions explicitly state is NOT unsolicited content. Final answer \"You have **45 days from delivery** to return a book from Northwind Books.\" directly answers the question. The follow-on \"That store extends the normal Cartwheel 30-day window, and the store window takes precedence for its orders.\" is a further relevant detail of the same policy (store-northwind-books-policy) the user asked about, which is defined as part of answering, not introducing a new topic. No offer to act, no escalation offer, no advice, and no closing \"anything else\" offer appears."
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-005",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        29.0645
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up the payout schedule in the help center to give you the right answer.\nI found a payout policy \u2014 now I'll pull the full details to confirm the timing.\nYour payouts go out weekly on Fridays, and each payout takes 2 business days to process after that.\n\nJust a heads up \u2014 any refunds you issue during the week are deducted from the next payout. (cw-payouts)",
+          "judge_reasons": {
+            "unsolicited_content": "User asked one narrow question: 'When do my payouts go out?' Agent answered: 'Your payouts go out weekly on Fridays, and each payout takes 2 business days to process after that.' The additional sentence 'Just a heads up \u2014 any refunds you issue during the week are deducted from the next payout. (cw-payouts)' is a further relevant detail from the same policy (cw-payouts) the user asked about, which the definitions explicitly allow as part of answering, not a new topic. The opening narration 'I'll look up the payout schedule in the help center...' and 'I found a payout policy \u2014 now I'll pull the full details...' states the next lookup mid-task, which is explicitly not unsolicited content. No offer of action, escalation, advice, new topic, or closing offer of further help appears."
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-006",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        38.2201
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up order 120 to get its current status and total.\nOrder 120 is **delivered** \u2014 it arrived on June 30.\n\nIts total was **$203.25**.\n",
+          "judge_reasons": {},
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-010",
+      "expected_write": false,
+      "failure_modes": [
+        "tool escalate_to_human called"
+      ],
+      "latencies_seconds": [
+        64.6962
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "tool escalate_to_human called"
+          ],
+          "final_reply": "I'm sorry it arrived damaged \u2014 I'll search your orders for the Handmade Wooden Train to locate the purchase.\nI found the damaged-train order \u2014 I'll pull up the full order details to verify the refund eligibility.\nI'm so sorry it arrived damaged \u2014 I found your order for 2 trains ($440.50) from Wooden Whale Workshop, and it shows as refund eligible.\n\nLet me check the return policy for damaged items to confirm the next steps for you.\n",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    }
+  ],
+  "cost_per_100_conversations_usd": 0.67775,
+  "cost_usd": 0.02711,
+  "created_at": "2026-10-06T02:51:27.516870+00:00",
+  "evaluated_case_runs": 4,
+  "git_commit": "556bf91443c2b789548f8c1e35082030666b055e",
+  "input_tokens": 22123,
+  "median_latency_seconds": 42.908,
+  "model": "openai/rl-muse-spark-1-3-sglang-playground",
+  "output_tokens": 4987,
+  "price_date": "2026-10-02",
+  "prompt_sha256_12": "cbfd4a7cec7b",
+  "schema_version": 1,
+  "score": 0.75,
+  "split": "test",
+  "test_plan_sha256": "8feaed1f4f7ff7944d9f2136e6fadd385133b8b21def37c1757e962b6a355979",
+  "write_pass_5": null
+}

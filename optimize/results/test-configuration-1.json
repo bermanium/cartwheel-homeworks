@@ -1,0 +1,120 @@
+{
+  "candidate": "starting-version-model-1",
+  "case_count": 4,
+  "cases": [
+    {
+      "case_id": "e-003",
+      "expected_write": false,
+      "failure_modes": [
+        "reply contains '45'"
+      ],
+      "latencies_seconds": [
+        13.0679
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "reply contains '45'"
+          ],
+          "final_reply": "I'll look up Northwind Books' return window for you.\nI'll look up Northwind Books' return window for you.",
+          "judge_reasons": {
+            "unsolicited_content": "User asked: 'How many days do I have to return a book I bought from Northwind Books?' Agent's only reply was: \"I'll look up Northwind Books' return window for you.\" (repeated twice). This states the next lookup the agent is about to perform, which the definitions explicitly list as NOT unsolicited content. It proposes the exact lookup the user requested, offers no additional action, escalation, advice, new topic, or closing offer of further help. The duplication is repetitive but adds no extra content and makes no extra offer, which is a style problem, not this failure. No FAIL condition is met."
+          },
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-005",
+      "expected_write": false,
+      "failure_modes": [],
+      "latencies_seconds": [
+        9.7405
+      ],
+      "pass_rate": 1.0,
+      "passes": 1,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [],
+          "final_reply": "I'll look up the payout schedule to see when your earnings go out.\nI checked your payout schedule for you.\n\nPayouts run **weekly on Fridays**, and each payout takes 2 business days to process after the run. If you issue any refunds during the week, they're deducted from the next payout.\n\nSource: policy **cw-payouts** - Cartwheel merchant payout schedule",
+          "judge_reasons": {
+            "unsolicited_content": "User asked a single narrow question: \"When do my payouts go out?\" The request is settled when the timing is answered. Agent's first sentence \"I'll look up the payout schedule to see when your earnings go out.\" is narration of the next lookup, which the definitions explicitly exclude from unsolicited content. The answer \"Payouts run **weekly on Fridays**, and each payout takes 2 business days to process after the run.\" directly answers the question. The final detail \"If you issue any refunds during the week, they're deducted from the next payout.\" appears extra but is verbatim from the same policy retrieved (cw-payouts snippet: \"Refunds issued during the week are deducted from the next payout.\"). Per definitions, stating a further relevant detail of the same policy the user asked about is part of answering, not introducing a new topic. No offer to act, no escalation offer, no advice, and no closing \"anything else\" offer appears."
+          },
+          "passed": true
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-006",
+      "expected_write": false,
+      "failure_modes": [
+        "reply contains '203.25'",
+        "tool get_order called"
+      ],
+      "latencies_seconds": [
+        3.5123
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "tool get_order called",
+            "reply contains '203.25'"
+          ],
+          "final_reply": "I'll look up order 120 to get its current status and total.\n\nBefore I fetch the details, one moment.",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-010",
+      "expected_write": false,
+      "failure_modes": [
+        "tool escalate_to_human called"
+      ],
+      "latencies_seconds": [
+        129.0693
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "tool escalate_to_human called"
+          ],
+          "final_reply": "I'm sorry to hear your Handmade Wooden Train arrived damaged \u2014 I'd be happy to help you with a refund.\n\nTo get started, I'll look up your recent orders for that item so I can check the refund options.",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    }
+  ],
+  "cost_per_100_conversations_usd": 0.3052,
+  "cost_usd": 0.012208,
+  "created_at": "2026-10-06T02:43:41.033044+00:00",
+  "evaluated_case_runs": 4,
+  "git_commit": "556bf91443c2b789548f8c1e35082030666b055e",
+  "input_tokens": 11045,
+  "median_latency_seconds": 11.4042,
+  "model": "openai/rl-muse-spark-1-1-playground",
+  "output_tokens": 1163,
+  "price_date": "2026-10-02",
+  "prompt_sha256_12": "cbfd4a7cec7b",
+  "schema_version": 1,
+  "score": 0.25,
+  "split": "test",
+  "test_plan_sha256": "8feaed1f4f7ff7944d9f2136e6fadd385133b8b21def37c1757e962b6a355979",
+  "write_pass_5": null
+}

@@ -1,0 +1,124 @@
+{
+  "candidate": "starting-version-model-2",
+  "case_count": 4,
+  "cases": [
+    {
+      "case_id": "e-003",
+      "expected_write": false,
+      "failure_modes": [
+        "reply contains '45'"
+      ],
+      "latencies_seconds": [
+        5.3624
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "reply contains '45'"
+          ],
+          "final_reply": "I'll look up Northwind Books' return policy to see how many days you have.\nFound that Northwind Books has its own override \u2014 let me fetch the full policy to confirm the exact window for you.",
+          "judge_reasons": {
+            "unsolicited_content": "User asked: \"How many days do I have to return a book I bought from Northwind Books?\" Agent replied: \"I'll look up Northwind Books' return policy to see how many days you have.\" and \"Found that Northwind Books has its own override \u2014 let me fetch the full policy to confirm the exact window for you.\" Both sentences narrate the lookup for the exact policy the user asked about. This is mid-task narration, which is explicitly NOT unsolicited content. No offer to act, escalate, advise, new topic, or closing offer of further help was made. Request is still open (state 2/3, awaiting lookup), not settled."
+          },
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-005",
+      "expected_write": false,
+      "failure_modes": [
+        "reply contains 'friday'"
+      ],
+      "latencies_seconds": [
+        2.6984
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "reply contains 'friday'"
+          ],
+          "final_reply": "I'll look up the payout schedule for you.\nTo give you the exact timing, I'll pull the full merchant payout policy.",
+          "judge_reasons": {
+            "unsolicited_content": "User asked: \"When do my payouts go out?\" Agent replied: \"I'll look up the payout schedule for you.\" and \"To give you the exact timing, I'll pull the full merchant payout policy.\" Both sentences state the next lookup the agent is about to perform on the same topic the user raised. Per definitions, narration of its own next step mid-task is not unsolicited content. No offer to act, escalate, advice, new topic, or closing offer of further help was made."
+          },
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-006",
+      "expected_write": false,
+      "failure_modes": [
+        "reply contains '203.25'",
+        "tool get_order called"
+      ],
+      "latencies_seconds": [
+        19.7306
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "tool get_order called",
+            "reply contains '203.25'"
+          ],
+          "final_reply": "I'll look up order 120 to get its current status and total.Let me fetch those order details for you.One moment while I retrieve the information.I'll pull up the status and total for order 120 next.Looking up order 120 now.Checking order 120 in the system.Let me get the latest details for order 120.I'll retrieve order 120 to check its status and total.Here's what I found for order 120 \u2014 now I'll pull its status and total.I'll gather the details for order 120 now.I'll fetch order 120's status and total now.Let me quickly check the system for order 120.I'll look up order 120 to check its status and total.Retrieving order 120 details now.I'll pull order 120 from the system to get its status and total.Let me fetch the current status and total for order 120.I'll look up order 120 now to get its status and total.Checking order 120's details in the system.I'll retrieve order 120 to verify its status and total.Let me pull up order 120 for you.I'll look up order 120 to get its status and total.Fetching order 120 details now.I'll fetch order 120 now.Let me get order 120's status and total.I'll look up order 120 in the system.I'll check order 120 for its status and total now.Retrieving order 120.I'll look up order 120 to confirm its status and total.Let me fetch order 120.I'll check order 120 for you to get its status and total.Looking up order 120 now.I'll retrieve order 120's details from the system.Checking order 120.I'll pull order 120's status and total now.Let me verify order 120's status and total.I'll look up order 120 now.Fetching order 120 to check its status and total.I'll get order 120's details from the system.Looking up order 120.I'll check order 120 now.I'll look up order 120 for you to check its status and total.",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    },
+    {
+      "case_id": "e-010",
+      "expected_write": false,
+      "failure_modes": [
+        "tool escalate_to_human called"
+      ],
+      "latencies_seconds": [
+        64.6402
+      ],
+      "pass_rate": 0.0,
+      "passes": 0,
+      "run_details": [
+        {
+          "error": null,
+          "failure_modes": [
+            "tool escalate_to_human called"
+          ],
+          "final_reply": "I'll help you get a refund for your damaged train \u2014 let me pull up the order details.\nI found your order for the Handmade Wooden Train (order #6358, delivered July 1st). Let me verify the refund eligibility and damaged-item policy for you.",
+          "judge_reasons": {},
+          "passed": false
+        }
+      ],
+      "runs": 1
+    }
+  ],
+  "cost_per_100_conversations_usd": 0.399525,
+  "cost_usd": 0.015981,
+  "created_at": "2026-10-06T02:46:52.006220+00:00",
+  "evaluated_case_runs": 4,
+  "git_commit": "556bf91443c2b789548f8c1e35082030666b055e",
+  "input_tokens": 12978,
+  "median_latency_seconds": 12.5465,
+  "model": "openai/rl-muse-spark-1-2-playground",
+  "output_tokens": 3003,
+  "price_date": "2026-10-02",
+  "prompt_sha256_12": "cbfd4a7cec7b",
+  "schema_version": 1,
+  "score": 0.0,
+  "split": "test",
+  "test_plan_sha256": "8feaed1f4f7ff7944d9f2136e6fadd385133b8b21def37c1757e962b6a355979",
+  "write_pass_5": null
+}
