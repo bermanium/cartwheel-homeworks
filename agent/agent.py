@@ -188,11 +188,14 @@ def model_settings_for(model: Any) -> ModelSettings:
 # the SDK wrappers at the bottom of the file expose them to the model.
 # ---------------------------------------------------------------------------
 
-SNIPPET_CHARS = 300
-
-
 def search_help_center_logic(ctx: AuthContext, query: str, k: int = 3) -> dict[str, Any]:
-    """BM25 search over the policy corpus. Read tool, no permission check."""
+    """BM25 search over the policy corpus. Read tool, no permission check.
+
+    Each result's snippet is the policy's full body. Every policy is a few
+    hundred characters, so the old 300-character cut returned nearly the whole
+    text anyway, and the agent paid for a second model call to fetch it with
+    get_policy (HW9 Part B).
+    """
     query = query.strip()
     if not query:
         return {"ok": False, "error": "invalid_argument", "reason": "empty query"}
@@ -202,7 +205,7 @@ def search_help_center_logic(ctx: AuthContext, query: str, k: int = 3) -> dict[s
             {
                 "policy_id": doc.policy_id,
                 "title": doc.title,
-                "snippet": doc.body[:SNIPPET_CHARS],
+                "snippet": doc.body,
                 "score": round(float(score), 3),
             }
         )
@@ -364,7 +367,8 @@ def _call(
 def search_help_center(
     wrapper: RunContextWrapper[AuthContext], query: str
 ) -> dict[str, Any]:
-    """Search Cartwheel's help-center policy docs. Returns top matches with policy ids."""
+    """Search Cartwheel's help-center policy docs. Returns top matches with policy ids
+    and each policy's full text, so no get_policy call is needed for a returned policy."""
     return _call(wrapper, search_help_center_logic, query)
 
 
