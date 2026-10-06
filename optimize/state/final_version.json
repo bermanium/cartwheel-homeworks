@@ -1,0 +1,72 @@
+{
+  "changed_layers": [
+    "prompt",
+    "harness"
+  ],
+  "comparison_models": [
+    "openai/rl-muse-spark-1-1-playground",
+    "openai/rl-muse-spark-1-2-playground",
+    "openai/rl-muse-spark-1-3-sglang-playground"
+  ],
+  "created_at": "2026-10-06T01:18:23.908745+00:00",
+  "development_model": "openai/rl-muse-spark-1-3-sglang-playground",
+  "development_result": "/Users/daberman/Desktop/AI Evals Course/cartwheel-homeworks/optimize/results/latest-development.json",
+  "development_score": 1.0,
+  "git_commit": "611e858231dc10314cd64656c81b70653f45cb6c",
+  "grader_sha256": "0ed9960b0a47dc9f767203cd6f44823d2ce19bb0b62083371e895e40513463b2",
+  "kind": "final",
+  "method": [
+    "manual",
+    "improve-loop"
+  ],
+  "model_selection_sha256": "64d3a77357a397167784a21f8a866d3c941dd90f978c66fd491ba9ed6e8cf68d",
+  "prompt_sha256_12": "96e4361d8626",
+  "search_budget": {
+    "maximum_calls": 150,
+    "reservations": [
+      {
+        "calls": 8,
+        "label": "loop-baseline",
+        "reserved_at": "2026-10-05T17:47:40.940137+00:00"
+      },
+      {
+        "calls": 8,
+        "label": "loop-1-act-on-announcement",
+        "reserved_at": "2026-10-05T18:10:45.037679+00:00"
+      },
+      {
+        "calls": 8,
+        "label": "loop-2-esc5-before-refund",
+        "reserved_at": "2026-10-05T18:28:56.643139+00:00"
+      },
+      {
+        "calls": 8,
+        "label": "loop-2-esc5-before-refund-rerun",
+        "reserved_at": "2026-10-05T19:05:39.199704+00:00"
+      },
+      {
+        "calls": 8,
+        "label": "loop-3-act-on-announcement-with-esc5",
+        "reserved_at": "2026-10-05T20:40:08.213379+00:00"
+      },
+      {
+        "calls": 8,
+        "label": "loop-3-act-on-announcement-with-esc5-rerun",
+        "reserved_at": "2026-10-05T21:00:23.865109+00:00"
+      },
+      {
+        "calls": 8,
+        "label": "loop-4-finish-announced-step",
+        "reserved_at": "2026-10-05T21:15:58.279576+00:00"
+      },
+      {
+        "calls": 8,
+        "label": "loop-4-finish-announced-step-rerun",
+        "reserved_at": "2026-10-05T21:45:41.486237+00:00"
+      }
+    ],
+    "used_calls": 64
+  },
+  "split_membership_sha256": "8ebfe190ef30f042a5b9a3354e9872724e53adaaa7cde38f6b134818c3eae3a8",
+  "write_pass_5": null
+}
