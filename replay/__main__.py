@@ -112,7 +112,12 @@ def make_runner(
                 "error": str(exc)[:500],
                 "steps": 0,
                 "tool_calls": [],
-                "usage": {"requests": 0, "input_tokens": 0, "output_tokens": 0},
+                "usage": {
+                    "requests": 0,
+                    "input_tokens": 0,
+                    "cached_input_tokens": 0,
+                    "output_tokens": 0,
+                },
                 "final_reply": "",
                 "agent_latency_seconds": time.perf_counter() - started,
             }

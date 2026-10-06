@@ -23,3 +23,4 @@ Assignments are released incrementally. More will appear here as the course prog
 ## Module 5
 
 - [Homework 8](module-5/hw8.md): Improve accuracy on one failure mode and compare agent configurations on a Pareto frontier.
+- [Homework 9](module-5/hw9.md): Reduce cost with fewer tokens, prompt caching, and a model cascade, then compare configurations by score and cost.

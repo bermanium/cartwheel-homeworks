@@ -10,6 +10,7 @@ Cartwheel is the support agent used throughout "Evaluating and Improving AI Agen
 - For repository maintenance, follow the requested change directly. Preserve unfinished homework functions unless implementing them is part of the request.
 - For HW4, read the handout in `homework/module-2/` and the [error-discovery](https://github.com/ai-evals-course/evals-skills/blob/main/skills/error-discovery/SKILL.md) skill on GitHub. For HW5, use the current handout with [write-judge-prompt](https://github.com/ai-evals-course/evals-skills/blob/main/skills/write-judge-prompt/SKILL.md) and [validate-evaluator](https://github.com/ai-evals-course/evals-skills/blob/main/skills/validate-evaluator/SKILL.md). HW5 requires one judge; additional judges and prevalence estimation are optional. Follow its label minimums, metric calculations, and interrupted-test instructions. Do not require numerical acceptance targets. Preserve the student's human labels and final decisions.
 - For HW8, read `homework/module-5/hw8.md` and the files in `optimize/`. When the student chooses the improve loop, follow `.agents/skills/improve-loop/SKILL.md` with `optimize/program.md`. Never run test cases before the student saves the final agent configuration.
+- For HW9, read `homework/module-5/hw9.md` and the files in `optimize/`. Use development cases only. Leave the keep or revert decisions, the cascade decision, and the configuration choices to the student.
 
 ## Shared rules
 
