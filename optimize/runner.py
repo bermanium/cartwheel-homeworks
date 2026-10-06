@@ -72,6 +72,13 @@ def read_prices(path: Path, model: str) -> tuple[str, float, float]:
     return str(date), float(prices["input"]), float(prices["output"])
 
 
+def read_cached_input_price(path: Path, model: str) -> float | None:
+    """Return the optional discounted price for cached input tokens."""
+    prices = read_json(path).get("prices_per_million_tokens_usd", {}).get(model) or {}
+    value = prices.get("cached_input")
+    return None if value is None else float(value)
+
+
 def default_output(split_name: str, candidate: str, model: str) -> Path:
     safe = "-".join(part for part in (candidate, model) if part).replace("/", "_")
     stamp = time.strftime("%Y%m%d-%H%M%S")
@@ -93,6 +100,7 @@ def run_evaluation(args: argparse.Namespace) -> dict[str, Any]:
 
     planned_runs = sum(runs_for_case(case) for case in cases)
     price_date, input_price, output_price = read_prices(args.config, args.model)
+    cached_price = read_cached_input_price(args.config, args.model)
     if args.search:
         reserve_search_calls(planned_runs, args.candidate)
     completed_runs = 0
@@ -102,6 +110,7 @@ def run_evaluation(args: argparse.Namespace) -> dict[str, Any]:
     world_root = Path(world_temp.name)
     records: list[dict[str, Any]] = []
     total_input = 0
+    total_cached = 0
     total_output = 0
 
     try:
@@ -119,6 +128,7 @@ def run_evaluation(args: argparse.Namespace) -> dict[str, Any]:
                 completed_runs += 1
                 usage = record.get("usage", {})
                 total_input += int(usage.get("input_tokens", 0))
+                total_cached += int(usage.get("cached_input_tokens", 0))
                 total_output += int(usage.get("output_tokens", 0))
             passes = sum(bool(record["passed"]) for record in case_records)
             records.append(
@@ -163,7 +173,14 @@ def run_evaluation(args: argparse.Namespace) -> dict[str, Any]:
         else None
     )
     all_latencies = [value for record in records for value in record["latencies_seconds"]]
-    total_cost = (total_input * input_price + total_output * output_price) / 1_000_000
+    # Cached input tokens are billed at the cached price when the config lists
+    # one; otherwise every input token is billed at the full input price.
+    billed_cached = total_cached if cached_price is not None else 0
+    total_cost = (
+        (total_input - billed_cached) * input_price
+        + billed_cached * (cached_price or 0.0)
+        + total_output * output_price
+    ) / 1_000_000
     result = {
         "schema_version": 1,
         "created_at": now_utc(),
@@ -178,6 +195,8 @@ def run_evaluation(args: argparse.Namespace) -> dict[str, Any]:
         "score": round(score, 6),
         "write_pass_5": None if write_pass_5 is None else round(write_pass_5, 6),
         "input_tokens": total_input,
+        "cached_input_tokens": total_cached,
+        "cached_fraction": round(total_cached / total_input, 6) if total_input else 0.0,
         "output_tokens": total_output,
         "price_date": price_date,
         "cost_usd": round(total_cost, 6),

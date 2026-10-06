@@ -186,7 +186,8 @@ def run_case(
         {"turns": [{"user", "reply", "tool_calls": [{"name", "args",
           "result"}], "steps"}],
          "final_reply": str, "steps": int,
-         "usage": {"requests", "input_tokens", "output_tokens"}}
+         "usage": {"requests", "input_tokens", "cached_input_tokens",
+                   "output_tokens"}}
     """
     from agents import Runner, SQLiteSession
 
@@ -199,7 +200,12 @@ def run_case(
     async def _run() -> dict[str, Any]:
         session = SQLiteSession(f"replay-{case['id']}")  # in-memory, per run
         turns = []
-        usage = {"requests": 0, "input_tokens": 0, "output_tokens": 0}
+        usage = {
+            "requests": 0,
+            "input_tokens": 0,
+            "cached_input_tokens": 0,
+            "output_tokens": 0,
+        }
         for message in messages:
             result = await Runner.run(
                 agent, message, context=ctx, session=session, max_turns=max_turns
@@ -210,6 +216,8 @@ def run_case(
             run_usage = result.context_wrapper.usage
             usage["requests"] += run_usage.requests
             usage["input_tokens"] += run_usage.input_tokens
+            details = run_usage.input_tokens_details
+            usage["cached_input_tokens"] += (details.cached_tokens or 0) if details else 0
             usage["output_tokens"] += run_usage.output_tokens
         return {
             "turns": turns,
