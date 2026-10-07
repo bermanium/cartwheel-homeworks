@@ -1,0 +1,102 @@
+{
+ "model": "openai/rl-muse-spark-1-3-sglang-playground",
+ "role": "shopper",
+ "rows": [
+  {
+   "repeat": 1,
+   "order": "before",
+   "step": "user A",
+   "prompt_tokens": 1990,
+   "cached_tokens": 1,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 1,
+   "order": "before",
+   "step": "user B",
+   "prompt_tokens": 1990,
+   "cached_tokens": 1,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 1,
+   "order": "before",
+   "step": "user A again",
+   "prompt_tokens": 1990,
+   "cached_tokens": 1,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 1,
+   "order": "after",
+   "step": "user A",
+   "prompt_tokens": 1990,
+   "cached_tokens": 1,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 1,
+   "order": "after",
+   "step": "user B",
+   "prompt_tokens": 1990,
+   "cached_tokens": 1,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 1,
+   "order": "after",
+   "step": "user A again",
+   "prompt_tokens": 1990,
+   "cached_tokens": 1,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 2,
+   "order": "before",
+   "step": "user A",
+   "prompt_tokens": 1990,
+   "cached_tokens": 33,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 2,
+   "order": "before",
+   "step": "user B",
+   "prompt_tokens": 1990,
+   "cached_tokens": 1,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 2,
+   "order": "before",
+   "step": "user A again",
+   "prompt_tokens": 1990,
+   "cached_tokens": 1,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 2,
+   "order": "after",
+   "step": "user A",
+   "prompt_tokens": 1990,
+   "cached_tokens": 1,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 2,
+   "order": "after",
+   "step": "user B",
+   "prompt_tokens": 1990,
+   "cached_tokens": 33,
+   "output_tokens": 16
+  },
+  {
+   "repeat": 2,
+   "order": "after",
+   "step": "user A again",
+   "prompt_tokens": 1990,
+   "cached_tokens": 497,
+   "output_tokens": 16
+  }
+ ]
+}
