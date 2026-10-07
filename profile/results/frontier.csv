@@ -1,0 +1,5 @@
+candidate,model,development_score,write_pass_5,cost_per_100_conversations_usd,median_latency_seconds,frontier_status
+final,openai/rl-muse-spark-1-3-sglang-playground,1.0,,1.0189,100.7727,dominated
+fewer-tokens,openai/rl-muse-spark-1-3-sglang-playground,1.0,,0.920462,22.4316,dominated
+cache-before,openai/rl-muse-spark-1-3-sglang-playground,1.0,,0.973825,13.5801,dominated
+cache-after,openai/rl-muse-spark-1-3-sglang-playground,1.0,,0.886862,20.6195,frontier
