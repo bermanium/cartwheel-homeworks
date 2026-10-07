@@ -1,6 +1,6 @@
 {
   "price_date": "2026-10-02",
-  "price_note": "Placeholder prices. Muse Spark is served through an internal Meta endpoint with no public price list, so every model carries the same nominal $1 per million input and output tokens. The cost column therefore compares token use, not dollars.",
+  "price_note": "Placeholder prices. Muse Spark is served through an internal Meta endpoint with no public price list, so every model carries the same nominal $1 per million input and output tokens. The cost column therefore compares token use, not dollars. HW9 Part C: cached input for Muse Spark 1.3 is billed at 0.5 (a 50 percent discount, the conservative end of provider pricing); Muse Spark is served by SGLang, which caches shared prefixes automatically and reports cached tokens.",
   "models": {
     "development_and_search": "openai/rl-muse-spark-1-3-sglang-playground",
     "comparison": [
@@ -13,6 +13,6 @@
   "prices_per_million_tokens_usd": {
     "openai/rl-muse-spark-1-1-playground": {"input": 1.0, "output": 1.0},
     "openai/rl-muse-spark-1-2-playground": {"input": 1.0, "output": 1.0},
-    "openai/rl-muse-spark-1-3-sglang-playground": {"input": 1.0, "output": 1.0}
+    "openai/rl-muse-spark-1-3-sglang-playground": {"input": 1.0, "cached_input": 0.5, "output": 1.0}
   }
 }
