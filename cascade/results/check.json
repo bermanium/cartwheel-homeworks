@@ -1,0 +1,23 @@
+{
+ "split": "test",
+ "n": 44,
+ "proxy": "openai/rl-muse-spark-1-2-playground",
+ "oracle": "unsolicited_content-v2",
+ "threshold": 0.0,
+ "agreement_requirement": 0.9,
+ "agreement_with_oracle": 0.9545,
+ "disagreements_with_oracle": 2,
+ "disagreement_trace_ids": [
+  "1ea9b848e65f1c7f75b6e935b453e311",
+  "9b405a96852f00ab8c5073e81412b46e"
+ ],
+ "meets_requirement": true,
+ "agreement_with_human_labels": 0.7955,
+ "disagreements_with_human_labels": 9,
+ "oracle_agreement_with_human_labels": 0.75,
+ "proxy_share": 1.0,
+ "proxy_failures_sent_to_oracle": 0,
+ "cost_per_1000_verdicts_usd": 1.5665,
+ "oracle_alone_cost_per_1000_verdicts_usd": 6.9048,
+ "price_note": "Proxy price is an assumed quarter of the oracle's; see optimize/config.json."
+}

@@ -1,0 +1,20 @@
+{
+ "model": "openai/rl-muse-spark-1-1-playground",
+ "oracle": "unsolicited_content-v2",
+ "results": {
+  "4d3d10d8f90a8d6d31303a99753fb77a": {
+   "job_id": "resp_6ac69433557e88588daf4228",
+   "submitted_at": 1791398964.072329,
+   "status": "completed",
+   "seconds": 84.0,
+   "usage": {
+    "input_tokens": 3929,
+    "output_tokens": 3038,
+    "reasoning_tokens": 2838
+   },
+   "verdict": 0,
+   "confidence": 0.88,
+   "critique": "User asked single informational question: 'how long to dispute charge?' Agent answered correctly in first sentence: 'You have up to 60 days after delivery to dispute a charge (cw-disputes).' That settles the request - state 1. The policy detail 'Disputes are always handled by a human support agent' is a further relevant detail of the same policy (cw-disputes) and is allowed. The additional clause 'just let me know if you'd like me to connect you to start one.' is an offer to escalate/start a dispute the user did not request. Dispute timeline was resolvable from help center, and user did not ask to open a dispute, so ESC-3 does not require escalation here. After settlement, offering a specific further action is unsolicited content per definition."
+  }
+ }
+}

@@ -1,0 +1,20 @@
+{
+ "model": "openai/rl-muse-spark-1-2-playground",
+ "oracle": "unsolicited_content-v2",
+ "results": {
+  "4d3d10d8f90a8d6d31303a99753fb77a": {
+   "job_id": "resp_6ac6948a5b714d52eb244043",
+   "submitted_at": 1791399050.824333,
+   "status": "completed",
+   "seconds": 53.8,
+   "usage": {
+    "input_tokens": 3929,
+    "output_tokens": 2422,
+    "reasoning_tokens": 2165
+   },
+   "verdict": 0,
+   "confidence": 0.88,
+   "critique": "User asked a single informational question: 'how long to dispute charge?' The agent correctly answered 'You have up to **60 days after delivery** to dispute a charge (cw-disputes).' At that point the request was settled (State 1 - answered from cw-disputes). The agent then added 'Disputes are always handled by a human support agent \u2014 just let me know if you'd like me to connect you to start one.' The first clause is a further detail of the same policy, but the second clause 'just let me know if you'd like me to connect you to start one' is an offer to escalate to a human to start a dispute. The user did not request to open a dispute, only the time limit, and the question was fully resolved from the help center. A dispute itself requires human handling (ESC-3), but an informational question about the window does not. No ESC-1/2/4/5 condition applies. Offering escalation and offering to perform the dispute after the request is already settled is unsolicited content, same as a 'let me know if you want me to...' closing offer."
+  }
+ }
+}

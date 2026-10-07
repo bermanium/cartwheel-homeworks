@@ -1,0 +1,19 @@
+{
+ "agreement_with_oracle_minimum": 0.9,
+ "decided_by": "Daniel",
+ "decided_at": "2026-10-07T19:02:49+00:00",
+ "decided_before": "any proxy verdict was compared with the oracle (only two one-request smoke tests had run, not compared)",
+ "proxy_candidates": [
+  "openai/rl-muse-spark-1-1-playground",
+  "openai/rl-muse-spark-1-2-playground"
+ ],
+ "oracle": "unsolicited_content-v2",
+ "rule": "choose the lowest threshold whose development agreement with the oracle is at least the minimum",
+ "chosen": {
+  "proxy": "openai/rl-muse-spark-1-2-playground",
+  "threshold": 0.0,
+  "decided_by": "Daniel",
+  "decided_at": "2026-10-07T19:38:06+00:00",
+  "basis": "lowest threshold with development agreement_with_oracle >= 0.90 (1.0 at threshold 0); fixed before the test check"
+ }
+}

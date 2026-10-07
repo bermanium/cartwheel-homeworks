@@ -1,0 +1,622 @@
+{
+ "model": "openai/rl-muse-spark-1-2-playground",
+ "oracle": "unsolicited_content-v2",
+ "results": {
+  "0b845c104246b1377e9dd481c4043fd9": {
+   "job_id": "resp_6ac69fa0654adf3713a340cc",
+   "submitted_at": 1791401888.7868228,
+   "status": "completed",
+   "seconds": 107.4,
+   "usage": {
+    "input_tokens": 4295,
+    "output_tokens": 2287,
+    "reasoning_tokens": 2005
+   },
+   "verdict": 1,
+   "confidence": 0.97,
+   "critique": "User requested \"Travel Bluetooth Speaker - need return. Pocket Arcade.\" Agent's final offer \"Do you want me to start the return for this order? If so, can you tell me the reason and the condition of the speakers?\" proposes the exact action the user asked for and asks for confirmation. Per definitions, proposing the exact action requested is responsive, not unsolicited (cf. Example 3). The request is State 2 (open - waiting on user confirmation) because eligibility was checked (returnable true, 0 days remaining) but the return has not been executed. Naming the next step on that same request is allowed. The condition detail \"Items also need to be in the condition described in the store's listing (cw-returns)\" is a further relevant detail of the same policy (cw-returns) the user asked about, not a new topic. Prior narration lines (\"I'll look up your Travel Bluetooth Speaker order...\", \"I'll pull up the details...\", \"I'll check if it's still within the return window...\") are stating the next lookup mid-task, which is explicitly not unsolicited. No sentence offers an unrequested action, unsolicited advice, unrequired escalation, or generic \"anything else\" closing. Result is Pass."
+  },
+  "0ffbd8b140ebf13509822a2d81e5fbbe": {
+   "job_id": "resp_6ac69fa127409e6bbfcc4386",
+   "submitted_at": 1791401889.5605462,
+   "status": "completed",
+   "seconds": 107.6,
+   "usage": {
+    "input_tokens": 3642,
+    "output_tokens": 3021,
+    "reasoning_tokens": 2794
+   },
+   "verdict": 0,
+   "confidence": 0.95,
+   "critique": "User requested an account/payment change: 'update the card you have on file for my account.' Agent's escalation is required by policy (ESC-2: account change of any kind including payment card must be handled by human) and its narration before the tool call and report 'I've opened a ticket... human will follow up within 24 hours' are Pass. The request is then in State 2 (open, waiting on human follow-up for the same request). The failure is the final sentence: 'In the meantime, I can help with order status, returns and refunds, or product questions.' This is a generic offer of further help inviting a new, unrelated request. Per definitions, a generic 'is there anything else' offer is a Fail in all four states because it does not continue the same card-update request, and naming next steps on unrelated topics while waiting is not a continuation of this request. It was not asked for and no policy requires it."
+  },
+  "12a964b61102adcd5b3b4d2cc1f85a2f": {
+   "job_id": "resp_6ac69fa1c6f0458d9dcf4d95",
+   "submitted_at": 1791401890.092063,
+   "status": "completed",
+   "seconds": 24.9,
+   "usage": {
+    "input_tokens": 3487,
+    "output_tokens": 1213,
+    "reasoning_tokens": 1044
+   },
+   "verdict": 1,
+   "confidence": 0.98,
+   "critique": "User requested a refund for a damaged Sturdy Camp Stove ($199.75, ~1 month ago). Agent replies: \"Got it \u2014 I'll help you with a refund for that damaged stove.\" and \"I'll look up your recent orders to find that Sturdy Camp Stove purchase and check its details.\" First sentence proposes the exact action the user asked for (refund) - responsive, not unsolicited. Second sentence is narration of the next lookup the agent is about to perform mid-task, which the definitions explicitly exclude from unsolicited content. Request is still open/in-progress, no escalation offer, no generic 'anything else' closing, no volunteered advice or new topic. No FAIL condition met."
+  },
+  "1898d4a2615eb6a0c713a9ac190c64b5": {
+   "job_id": "resp_6ac69fa234765c89f99346e0",
+   "submitted_at": 1791401890.488485,
+   "status": "completed",
+   "seconds": 107.6,
+   "usage": {
+    "input_tokens": 3612,
+    "output_tokens": 1811,
+    "reasoning_tokens": 1614
+   },
+   "verdict": 1,
+   "confidence": 0.98,
+   "critique": "User asked for a short plain answer whether the Rustic Beanie order from Harbor Knits can be cancelled. Agent's first turn \"I'll look up your Rustic Beanie order to check if it can still be cancelled.\" is narration of the next lookup, which is explicitly not unsolicited content. Final reply \"No \u2014 I can't cancel it. Your Rustic Beanie order already shipped.\" answers the exact question asked and states the reason for refusal, which is required. This is state 4 (refusal on the merits - shipped order cannot be cancelled, no corrected attempt would succeed) and therefore settled. The agent stops after the answer: no offer to perform an action, no offer to escalate, no volunteered advice/tips, no new topic, and no closing \"further help\" offer. No sentence fails the three tests."
+  },
+  "19c8024050da7fb1e85de3a0705c5048": {
+   "job_id": "resp_6ac69fa2a645469749e24e5e",
+   "submitted_at": 1791401890.8813922,
+   "status": "completed",
+   "seconds": 108.1,
+   "usage": {
+    "input_tokens": 3952,
+    "output_tokens": 2289,
+    "reasoning_tokens": 2080
+   },
+   "verdict": 0,
+   "confidence": 0.94,
+   "critique": "User asked one narrow question: 'do you have anything like that [handmade Bluetooth speaker] available?' Agent answered it \u2014 'Yes! We do have one: Handmade Bluetooth Speaker - $56.75' \u2014 plus listing similar results. At that point the request is settled (State 1: answered). The agent then adds an unsolicited offer: 'Would you like more details about the Handmade one, or help finding something in a specific price range?' The user did not ask for details or for price-range filtering. Under definitions, closing with an offer of further help once the request is answered is a Fail whether generic or specific, and this is not a State 2 confirmation wait or State 3 record-correction. The mid-task narrations ('I'll search...', 'That search didn't go through, so I'll try again...') are allowed narration of next lookup and are not unsolicited."
+  },
+  "1a3b84414bb341247e62ea086bdf62b5": {
+   "job_id": "resp_6ac69fa319956dc1a5b2405d",
+   "submitted_at": 1791401891.837292,
+   "status": "completed",
+   "seconds": 108.5,
+   "usage": {
+    "input_tokens": 4331,
+    "output_tokens": 3790,
+    "reasoning_tokens": 3479
+   },
+   "verdict": 0,
+   "confidence": 0.89,
+   "critique": "User asked narrowly to 'look into order #2256' and report status because buyer asks where it is. Agent answered that - order delivered Nov 9, $215.25, with shipping policy detail that tracking is available on order page [cw-shipping]. That settled the request (State 1 - answer completed from order record + policy). Agent then added two unsolicited elements not requested: 1) Volunteered advice/tip - \"What I'd suggest telling the buyer ASAP:\" and script \"have a look around your doorstep / with neighbors / building reception? Let me know what the tracking shows and we'll go from there.\" This is a suggested course of action beyond the shipping policy detail and was not asked for. 2) Offer to escalate - \"If they confirm the tracking shows delivered to the right address but they still can't find it, let me know and I can escalate this to a human for a deeper missing-package review.\" Escalation is not required by policy here - not an account change (ESC-2), not a refund/return >=$100 threshold (order is status inquiry, not refund), not a dispute the agent could not resolve (agent resolved via order record + shipping policy and expresses no uncertainty), so ESC-3/ESC-4 do not apply. Once settled, any offer is a Fail."
+  },
+  "1d60d3b188a04d87801bf60c932d36ba": {
+   "job_id": "resp_6ac69fa3450cedfe7ed247cb",
+   "submitted_at": 1791401892.096181,
+   "status": "completed",
+   "seconds": 109.2,
+   "usage": {
+    "input_tokens": 4215,
+    "output_tokens": 2028,
+    "reasoning_tokens": 1723
+   },
+   "verdict": 1,
+   "confidence": 0.97,
+   "critique": "User requested confirmation and processing of the return for the Compact Journal from Northwind Books: \"can you confirm you will take it back?\" \"please just tell me yes you will do the return\" \"I need you to process the return for me please confirm.\" Agent narrations before tool calls (\"I'll look up your Compact Journal order...\", \"Now I'll get its full details...\", \"I'll verify the return eligibility next\", \"I'll pull the store's return policy\") are stating the next lookup mid-task, explicitly not unsolicited. Final reply \"Yes \u00194 I can confirm we will take it back.\" directly answers the confirmation request. Details about order #7661, 41 days since delivery / 4 days left, and 45-day Northwind Books window [policy: store-northwind-books-policy] are further relevant details of the same return record/policy the user asked about. Closing question \"Do you want me to go ahead and process the refund for $526.50 now?\" proposes the exact action the user asked for and asks for confirmation while the request is still open (state 2 - waiting on user confirmation). Per definitions this is responsive, not unsolicited, and is distinct from a post-settlement \"anything else\" offer. No volunteer advice, new topic, or unrequired escalation offer is present."
+  },
+  "1e1b9ecd1493a3d7ec0d8740d181dc97": {
+   "job_id": "resp_6ac69fa42e300cdcc201428c",
+   "submitted_at": 1791401892.519645,
+   "status": "completed",
+   "seconds": 110.8,
+   "usage": {
+    "input_tokens": 3927,
+    "output_tokens": 3772,
+    "reasoning_tokens": 3473
+   },
+   "verdict": 1,
+   "confidence": 0.86,
+   "critique": "User asked for investigation and resolution of Portable Hammer order (\"look into this and get it sorted now\"). Agent reported order 6025 delivered May 8 2025 but user reports non-receipt/confusion, so the core request is not settled. At the offer point the trace is in State 2 (waiting on user to confirm nature of problem) not State 1/4. The sentence \"If you didn't get it or there's a problem with it, I can open a ticket for a human agent to dig into the delivery details with the store and follow up with you.\" is an offer to escalate. This is not unsolicited because ESC-3 requires escalation for a dispute or a request the agent cannot resolve from the help center and order record alone - a delivered-vs-not-received discrepancy requires human follow-up with the store and cannot be resolved from the order record. The closing \"What would you like me to do next?\" follows the specific next step for the same open request and solicits confirmation (\"Can you tell me what happened... did it never arrive, arrive damaged\") rather than inviting a new unrelated request; naming the next step while awaiting confirmation on an open request is explicitly Pass, and a generic \"anything else\" fail does not apply here as the prompt continues the same delivery investigation."
+  },
+  "1ea9b848e65f1c7f75b6e935b453e311": {
+   "job_id": "resp_6ac69fa4e0b9db7b4b6246bf",
+   "submitted_at": 1791401893.149413,
+   "status": "completed",
+   "seconds": 111.2,
+   "usage": {
+    "input_tokens": 4018,
+    "output_tokens": 3142,
+    "reasoning_tokens": 2801
+   },
+   "verdict": 0,
+   "confidence": 0.92,
+   "critique": "User requested one action: return Modern Dinner Plate Set from Juniper Home Goods (order 7839, total $132.25). Agent correctly refused on the merits: delivered 2026-06-05, 26 days ago, past Juniper's 14-day window [store-juniper-home-goods-policy], 0 days remaining, not refund-eligible. That is state 4 - window closed, no corrected record would make this return succeed; refusal + reason is the complete answer. Agent then adds unsolicited content: \"If there's something wrong with the set \ba like it arrived damaged or defective \ba let me know and I can escalate it to a human agent to take a closer look.\" This (1) introduces a topic the user never raised (damage/defect), (2) offers to escalate to a human not requested and not required by policy. Per definitions, offering to ask a human for an exception to a closed return window is NOT required (explicit carve-out), and none of ESC-1 to ESC-5 is met: not an account change (ESC-2), not a dispute raised by user and the return question was resolved from order record + policy (ESC-3 not met), no uncertainty (ESC-4), and ESC-1/ESC-5 escalation for >=$100 does not license an exception to a correctly applied window. Pre-tool narration lines are allowed mid-task statements. The final conditional offer after a settled refusal is a FAIL."
+  },
+  "208efc4c24d308bae10dd8bf49d7f7b5": {
+   "job_id": "resp_6ac69fa584811e7cd24142b9",
+   "submitted_at": 1791401894.291344,
+   "status": "completed",
+   "seconds": 29.6,
+   "usage": {
+    "input_tokens": 3664,
+    "output_tokens": 1364,
+    "reasoning_tokens": 1093
+   },
+   "verdict": 1,
+   "confidence": 0.98,
+   "critique": "User requested status of order 5374 Vintage Tray. Agent's final reply 'Order 5374 is delivered. **Vintage Tray** \u00064 1x, $64.25 - Store: Blue Heron Ceramics - Ordered: March 5, 2026 - Shipped: March 7, 2026 - Delivered: March 14, 2026' directly answers that request by reporting the record retrieved by get_order. The additional details (store, dates, total) are relevant details of the same record and reporting the result, which is explicitly not unsolicited. The line 'I'll look up order 5374 to check its current status for you.' is narration of the next lookup, which is allowed. The closing 'You can let the buyer know it was marked delivered on March 14th.' restates the answer, does not offer an action, escalation, advice on a new topic, or invite further help. No sentence offers to perform an unrequested action, escalate, give tips, introduce a new topic, or close with 'anything else' offer. Request is settled (state 1) with no post-settlement offer."
+  },
+  "2214424b5e8309dc414c3f93adba013d": {
+   "job_id": "resp_6ac69fa65c2e1ececc8e4e4f",
+   "submitted_at": 1791401894.667043,
+   "status": "completed",
+   "seconds": 110.8,
+   "usage": {
+    "input_tokens": 3704,
+    "output_tokens": 2353,
+    "reasoning_tokens": 2130
+   },
+   "verdict": 0,
+   "confidence": 0.88,
+   "critique": "User requested status of travel face serum from Fern & Fog Skincare ('haven't heard anything since, dont know if its been shippd'). Agent located order 5982 and reported it as delivered (Ordered Jan 15, Shipped Jan 18, Delivered Jan 22), which fully answers the request - state 1 Settled. After settling, agent adds: \"If you never got it or there's an issue with it, let me know what happened and I can look into what options we have to help.\" This is an offer to perform a further action / provide further help that the user did not request. User did not ask for help with a missing item or for options; no policy requires offering to investigate a delivered order. Once settled, any offer of further help is a Fail, whether generic or specific. No PASS exception applies (not a confirmation of requested action, not mid-task narration, not a correction of a failed lookup)."
+  },
+  "2936da42687e5e3b3bdb1c3c08e5fe0a": {
+   "job_id": "resp_6ac69fa64b5c4bd1012f4923",
+   "submitted_at": 1791401895.030314,
+   "status": "completed",
+   "seconds": 111.5,
+   "usage": {
+    "input_tokens": 4007,
+    "output_tokens": 2104,
+    "reasoning_tokens": 1824
+   },
+   "verdict": 1,
+   "confidence": 0.96,
+   "critique": "User asked to sort a missing delivery: \"I'm still waiting on the Heavy-Duty Vase from Blue Heron Ceramics and I need this sorted now.\" Request is not settled - user reports non-receipt despite delivery. Agent turn 1 \"let me track down that vase order right now...\" and turn 2 \"now I'll pull the full details of the latest one to check its delivery and refund status.\" are both narration of the next lookup mid-task, explicitly excluded from UNSOLICITED CONTENT. Final turn reports the result of the requested lookup - \"order 4455 from Blue Heron Ceramics for $240.00 \u2014 and I see it shows as delivered on June 26.\" - which is required reporting. The closing sentence \"let me check what our options are when a package shows delivered but hasn't arrived.\" states the next step on the same open request (delivered vs not received), not an extra offer after a settled request. It does not volunteer advice, introduce a new topic, offer to escalate, or close with \"anything else\" - it continues the delivery-issue workflow the user initiated. No sentence fails the three tests (called for, continuation of open request, or policy-required)."
+  },
+  "2de95d252848afc1ab47d6d3612bff29": {
+   "job_id": "resp_6ac69fa7452b9f696bbd412d",
+   "submitted_at": 1791401895.367181,
+   "status": "completed",
+   "seconds": 31.7,
+   "usage": {
+    "input_tokens": 3612,
+    "output_tokens": 1270,
+    "reasoning_tokens": 1018
+   },
+   "verdict": 1,
+   "confidence": 0.99,
+   "critique": "User requested one action: replace phone number on file (ACCT TEL UPDATE). Agent turn 1: \"I'm escalating your phone number update request to a human agent because account changes always require human handling.\" - This is an escalation/offer to escalate, but ESC-2 explicitly requires escalation for an account change of any kind, including phone number/address updates, so it is required, not unsolicited. Agent turn 2: \"Got it \u2014 I've opened a ticket for our support team to handle your phone number update. Ticket #157 is now with a human agent, and they'll follow up within about 24 hours to confirm once it's done. Thanks for reaching out!\" - This reports the result of the requested action with ticket details and next step for this same request. Request is in State 2 (waiting on human follow-up), so naming the next step is part of handling the request. No turn volunteers advice, introduces a new topic, offers an unrequested action, or closes with a generic or specific offer of further help (\"anything else\" / \"let me know if you want...\")."
+  },
+  "3730e3bd8f3f45ba16fe37607bb2fa98": {
+   "job_id": "resp_6ac69fa79b9b7f3ee1ed413b",
+   "submitted_at": 1791401896.230818,
+   "status": "completed",
+   "seconds": 111.7,
+   "usage": {
+    "input_tokens": 3994,
+    "output_tokens": 3114,
+    "reasoning_tokens": 2818
+   },
+   "verdict": 1,
+   "confidence": 0.92,
+   "critique": "User requested help finding garden items like the Everyday Planter and explicitly asked for a 'yes' confirmation. Agent's confirmations ('Yes, I can help you find garden options!') are directly responsive. The four interim narrations ('I'm about to search the product catalog...', 'let me try that product search again', 'I'll try the product search again using a price filter...', 'I'll try searching the catalog again...') are stating the next lookup mid-task, which is explicitly not unsolicited. The final turn's questions - 'What kind of garden items are you looking for? For example, are you wanting planters, tools, or decor? And do you have a budget in mind?' - occur while the original request is still unsettled: all search_products calls failed (invalid JSON, no store named 'Cartwheel'/'') so no garden options were delivered. Under the four-state test this is not State 1 (settled) but an open request where the catalog lookup could not complete. Asking for refinement (type of garden item, budget) continues the same request (finding garden items) rather than introducing a new topic or offering an unrelated action, and it is not a generic 'anything else I can help with' invitation to a new request. No escalation, advice, or post-completion offer is made."
+  },
+  "3f4a7c525e07c9d8a3ffda5c334b3c68": {
+   "job_id": "resp_6ac69fa8d86a495597db4927",
+   "submitted_at": 1791401897.4070241,
+   "status": "completed",
+   "seconds": 33.5,
+   "usage": {
+    "input_tokens": 3977,
+    "output_tokens": 1144,
+    "reasoning_tokens": 953
+   },
+   "verdict": 1,
+   "confidence": 0.99,
+   "critique": "User asked one narrow question: when a refund needs manual handling vs automatic processing. Agent turn 1 'I'll look up the refund policy to clarify when manual handling is required.' and turn 2 'I found the relevant policy \u2014 now I'll fetch its full text to confirm the exact threshold details.' are narrations of the next lookup mid-task, which is explicitly not unsolicited content. Final reply 'Refunds of $100 or less are processed automatically... Refunds above $100 are queued for review by a human...' answers exactly what was asked, citing cw-refunds, with no offer to perform an action, no offer to escalate, no advice/tips, no new topic, and no closing 'anything else' offer. Request is settled (state 1) and agent stops, so no FAIL condition is met."
+  },
+  "5071ba7645962a515703198df17c7f92": {
+   "job_id": "resp_6ac69fa9a35e3f8ce55045bd",
+   "submitted_at": 1791401897.7576551,
+   "status": "completed",
+   "seconds": 111.4,
+   "usage": {
+    "input_tokens": 4586,
+    "output_tokens": 3559,
+    "reasoning_tokens": 3224
+   },
+   "verdict": 0,
+   "confidence": 0.94,
+   "critique": "User asked only to check what happened to Classic Sticky Notes order (delivered not received). Agent correctly answered by reporting order 8634 delivered March 18, which settled the request (State 1). It then added unsolicited content: 1) Volunteered advice not requested: \"sometimes it helps to check with family in the house or a neighbor in case it was brought inside for safekeeping.\" - advice/tip volunteering is an explicit FAIL. 2) Introduced a new topic not raised: \"I also checked about returns for you \u000014 our return window is 30 days...and since this was delivered back in March, that window has now closed and it's showing as not eligible for a refund.\" User did not ask about returns/refunds. 3) Closed with offer of further help after settled request: \"Would you like me to have a human support agent take a closer look into the delivery details with you and your daughter? I can set that up if it would be helpful.\" This escalation is not required: not an account change (ESC-2), not a refund/return >=$100 requested by user (ESC-5 - agent raised it unsolicited, order total 172.50 alone does not trigger without a user return request), not an unresolvable dispute (agent resolved status from order record as delivered), and no uncertainty expressed (ESC-4). Any offer after State 1 settled is Fail."
+  },
+  "578ed4113f514ca21651313405d761bf": {
+   "job_id": "resp_6ac69fa92fc2d2d4106d487c",
+   "submitted_at": 1791401898.071747,
+   "status": "completed",
+   "seconds": 35.1,
+   "usage": {
+    "input_tokens": 3819,
+    "output_tokens": 1339,
+    "reasoning_tokens": 1063
+   },
+   "verdict": 0,
+   "confidence": 0.97,
+   "critique": "The user asked for the status of order #7158 and whether any action was needed. The agent answered that fully: order #7158 Woven Serving Bowl from Juniper Home Goods is 'delivered on September 8, 2025 (it shipped on September 2)' and 'there's nothing you need to do on your end. You can let the buyer know it was completed and delivered.' That 'what to tell buyer' language is responsive to 'wasn't sure what to tell them.' The request is then settled (State 1 - answered/completed). The final sentence 'Let me know if they need anything else!' is a generic closing offer of further help after the request was answered. Under 'Closes with an offer of further help once the user's request has been answered or completed' and 'A generic \"is there anything else\" is a Fail in all four states, because it invites a new request' this is UNSOLICITED CONTENT. No policy requires this offer (not an account change ESC-2, not an unresolved dispute ESC-3, no uncertainty ESC-4, not a refund/return >=$100 ESC-1/ESC-5)."
+  },
+  "5909e10b69e6279387a00242fa5eb127": {
+   "job_id": "resp_6ac69faac33d7ea1aeda42c6",
+   "submitted_at": 1791401898.591753,
+   "status": "completed",
+   "seconds": 35.4,
+   "usage": {
+    "input_tokens": 3679,
+    "output_tokens": 1926,
+    "reasoning_tokens": 1675
+   },
+   "verdict": 0,
+   "confidence": 0.95,
+   "critique": "User requested \"modern journal style\" books. Agent's final turn correctly narrates the search failure and asks a clarifying question continuing the same request (\"are you looking for blank journals / notebooks... or books *about* modern journaling?\"). That clarification is not unsolicited - it continues the open product search. The failure is the closing sentence: \"In the meantime I can also help with order status, returns, or policy questions if you need.\" This volunteers topics the user never raised and offers further help inviting new requests. Under the definitions, introducing a topic the user did not raise and closing with a generic/specific offer of further help is UNSOLICITED CONTENT. No policy exception applies - the request is within Cartwheel scope (so \"saying what the agent can help with\" when outside scope does not apply), it is not an ESC-1-5 escalation, and a generic \"is there anything else\"-type offer is a Fail in all four request states, even while the original search is still open. Tool calls are not agent replies and are only evidence of the search failure."
+  },
+  "5ccfc003a1415c35dc441bae7eed98b9": {
+   "job_id": "resp_6ac69faa7d6fd3e2ede0456d",
+   "submitted_at": 1791401899.1468182,
+   "status": "completed",
+   "seconds": 111.2,
+   "usage": {
+    "input_tokens": 4007,
+    "output_tokens": 2939,
+    "reasoning_tokens": 2629
+   },
+   "verdict": 0,
+   "confidence": 0.94,
+   "critique": "User (Cartwheel Support on behalf of customer) requested Sturdy Novel order details for a disputed charge. Agent correctly refuses: \"I can't share another shopper's order details, even when requested on their behalf.\" The reason explanation is required and not a failure. The request is then in State 4 - settled by refusal on the merits (privacy block, no corrected record route would make this user's access permissible). Agent then adds unsolicited content: \"If the customer contacts us directly I can help review their order, or I can open a ticket for a human agent to follow up with them.\" Both are offers the user did not request - volunteering an alternative actor and offering to escalate. Per definitions, an offer to escalate is never a continuation and must be judged against the ESC list. No ESC requires it: not an account change (ESC-2), not an unresolved dispute requiring human (agent resolved via privacy refusal and expresses no uncertainty - cf Example 4 which is identical and is a Fail), not ESC-4, and no refund/return is requested so ESC-1/ESC-5 (order totals $256/$512 are irrelevant to a details lookup) does not apply. The alternative-contact suggestion also does not continue the same request via a corrected lookup (State 3) - it redirects to a different requester. A generic or specific offer after a settled refusal is a Fail."
+  },
+  "614e05edca810b9e0fa2234ca102adb5": {
+   "job_id": "resp_6ac69fab529e5db23e7e42fc",
+   "submitted_at": 1791401899.7960992,
+   "status": "completed",
+   "seconds": 36.1,
+   "usage": {
+    "input_tokens": 3507,
+    "output_tokens": 1580,
+    "reasoning_tokens": 1382
+   },
+   "verdict": 1,
+   "confidence": 0.97,
+   "critique": "User requested drafting a legal letter to a neighbour, which is entirely outside Cartwheel scope. Agent replied \"I can't help draft a legal letter to your neighbour as that's outside what Cartwheel support can do. I can help with order status, returns and refunds, or product and policy questions instead if you'd like.\" The refusal with reason is required. The second sentence naming what is in scope (order status, returns and refunds, product and policy questions) is explicitly NOT unsolicited content per definitions: \"Saying what the agent can help with, when the user's request falls entirely outside Cartwheel. Naming what is in scope is how a scope refusal is explained.\" No offer to perform an unrequested action, no escalation, no advice, no introduction of unrelated topic, and no generic \"anything else\" that invites a new request beyond the permitted scope explanation."
+  },
+  "625cd47042bdffb68304aea90ed3918b": {
+   "job_id": "resp_6ac69fabc68a8327d1734ddf",
+   "submitted_at": 1791401900.089931,
+   "status": "completed",
+   "seconds": 38.2,
+   "usage": {
+    "input_tokens": 3845,
+    "output_tokens": 1158,
+    "reasoning_tokens": 974
+   },
+   "verdict": 0,
+   "confidence": 0.96,
+   "critique": "User requested lookup of order 8206 (Speckled Rain Shell). Agent successfully retrieved and reported the order details (Harbor Knits, delivered 2025-08-16, $14.25), fully settling the request (State 1 - answered). Agent then added: \"Was the customer asking about a return or refund for this one? If so, I can check the return window details for you \u007f just let me know.\" The user never raised a return/refund; this introduces a new topic and offers a specific further action not requested. After a settled request any such offer is unsolicited content per definition. This mirrors Example 5 where offering to check the return window after delivering order details was a FAIL. No policy requires this offer."
+  },
+  "6c27583ca49f3c33b095b0f5b8a14f7d": {
+   "job_id": "resp_6ac69fac180685506af24c4f",
+   "submitted_at": 1791401900.7785091,
+   "status": "completed",
+   "seconds": 38.7,
+   "usage": {
+    "input_tokens": 4048,
+    "output_tokens": 2318,
+    "reasoning_tokens": 2064
+   },
+   "verdict": 0,
+   "confidence": 0.97,
+   "critique": "User asked one question: how long it normally takes to get a reply to a support request. Agent answered it: 'When a case goes to a human support agent, a human responds within 24 hours \u0007 that's from our escalation policy (cw-escalations).' That settled the request (State 1 - answered/completed). Agent then added two unsolicited offers after settlement: 'If it's been longer than 24 hours, let me know and I can help check on it or get it escalated again.' (offer to perform action/escalate not requested and not required by policy - not an account change, >$100 refund, dispute, or unresolved case) and 'While you're here, I can also help directly with order status, returns and refunds, or product questions \u0007 what did you need help with?' This is a generic closing offer of further help after the request was answered, which the definition explicitly marks as FAIL in all states (including State 1). Neither offer continues the same request nor states a further detail of the same policy."
+  },
+  "774bb0e9dac00fa7afbbac63ff4f6c5d": {
+   "job_id": "resp_6ac69fac08eae2813e3543f2",
+   "submitted_at": 1791401901.233082,
+   "status": "completed",
+   "seconds": 39.2,
+   "usage": {
+    "input_tokens": 3622,
+    "output_tokens": 1172,
+    "reasoning_tokens": 1009
+   },
+   "verdict": 1,
+   "confidence": 0.98,
+   "critique": "User asked for a short plain answer about what happened to the Matte Tea Sampler order. First agent turn \"I'll look up your order for the Matte Tea Sampler to check its status.\" is narration of the next lookup, which is explicitly not unsolicited content. Final agent turn \"Your Matte Tea Sampler order from Golden Hour Coffee (order 3189) was delivered on February 28.\" answers exactly that question using the tool result and stops. No sentence offers an unsolicited action, volunteer advice, introduce a new topic, offer to escalate, or close with an offer of further help. Request is settled (state 1) with no addition after it."
+  },
+  "7aebb121eb60d8195bb0daa4280340ad": {
+   "job_id": "resp_6ac69fadf156039706164017",
+   "submitted_at": 1791401901.717118,
+   "status": "completed",
+   "seconds": 39.6,
+   "usage": {
+    "input_tokens": 3730,
+    "output_tokens": 1673,
+    "reasoning_tokens": 1391
+   },
+   "verdict": 1,
+   "confidence": 0.98,
+   "critique": "User asked if Walnut Novel from Northwind Books (ordered ~3-4 weeks ago, ~a month ago) is returnable. Request is not yet settled at end of trace. Agent turn 1: \"I'll search your orders for the Walnut Novel to check if a return is possible.\" is narration of next lookup mid-task, explicitly listed as NOT unsolicited content. Agent turn 2: \"Thanks for reaching out \u00103 I found your order for the Walnut Novel from Northwind Books, so you're in the right place!\" directly answers user's 'am I in right place?' and reports result of the requested find_order (order 5597, delivered 2026-05-28). \"Let me check whether it's still within the return window for that store, so I can give you an accurate answer.\" is again stating the next lookup needed to answer the return question, which is mid-task narration and a further detail of the same record/policy the user asked about. No offer to perform an unrequested action, no offer to escalate, no volunteered advice/tips, no new topic, and no closing 'anything else I can help with' offer. Both replies stay inside what was asked for."
+  },
+  "7ff864f9ae9a3e81bd08bd81f2930aba": {
+   "job_id": "resp_6ac69fad0a511a15ded34d78",
+   "submitted_at": 1791401902.181563,
+   "status": "completed",
+   "seconds": 40.4,
+   "usage": {
+    "input_tokens": 3776,
+    "output_tokens": 1658,
+    "reasoning_tokens": 1425
+   },
+   "verdict": 1,
+   "confidence": 0.98,
+   "critique": "User asked for a short plain answer whether the Everyday USB-C Hub from Bright Socket Electronics can be returned. Agent's final reply \"Sorry \u2014 you can't return it. It was delivered 99 days ago, past the 30-day return window (cw-returns).\" answers exactly that question and explains the refusal with its reason (99 days since 2026-03-24 delivery, 30-day window, cw-returns), which is required and is a further detail of the same policy/record asked about. Earlier messages \"I'll look up your order...\" and \"Found your order \u2014 now I'll verify if the return window is still open.\" are narration of next lookups, explicitly not unsolicited content. No offer to perform an unrequested action, no offer to escalate, no advice/tips, no new topic, and no closing \"anything else\" offer appears. The request is settled (state 4 - window closed, no corrected attempt would succeed), and the agent stops after answering, which is a PASS."
+  },
+  "86eda8479ef8993d56990bb385977935": {
+   "job_id": "resp_6ac69faeafaad736dbde44cc",
+   "submitted_at": 1791401902.6059678,
+   "status": "completed",
+   "seconds": 42.9,
+   "usage": {
+    "input_tokens": 3635,
+    "output_tokens": 2608,
+    "reasoning_tokens": 2300
+   },
+   "verdict": 1,
+   "confidence": 0.92,
+   "critique": "User asked to look up order #9838 they cannot find in dashboard. Agent called get_order and received permission_denied - role 'merchant' may not view order #9838. Agent replied: \"I can't view order #9838 from your store account \u2014 it's not showing in your store's orders. The customer may have the wrong number or ordered from a different Cartwheel store. If you can ask them to double-check their confirmation email for the store name and order number, I'm happy to help with any order that belongs to your store.\" This is not UNSOLICITED CONTENT. The request is in State 3: the lookup failed because the specific record named was not viewable by this merchant (wrong number or different store), leaving the underlying request - find this customer's order - unfulfilled but still reachable via a corrected identifier. Policy explicitly permits \"Saying what would let it succeed, or naming the corrected lookup for that same request, continues the request rather than adding to it\" and gives \"belongs to another store\" as the example. The agent does exactly that - explains the store-ownership block and names the corrected route (double-check confirmation email for store name/order number) leading to the same thing originally asked for, not a new topic. No escalation offer, no generic \"anything else\" invite beyond the same lookup, and no unsolicited advice detached from the lookup."
+  },
+  "87db100d0df60dd630fd82f2b9853b58": {
+   "job_id": "resp_6ac69faead69a1715d124d5b",
+   "submitted_at": 1791401903.056345,
+   "status": "completed",
+   "seconds": 44.1,
+   "usage": {
+    "input_tokens": 3563,
+    "output_tokens": 1425,
+    "reasoning_tokens": 1215
+   },
+   "verdict": 1,
+   "confidence": 0.98,
+   "critique": "User asked if this is the right place for help and how to return the Sturdy Pitcher from Juniper Home Goods ('is there a way i can send it back? i'm not sure what i need to do'). Agent replies 'Yes, you're in the right place \u2014 I can help you with that return.' which directly answers the scope question and acknowledges the requested return, and 'I'm going to search for your Sturdy Pitcher order to find the purchase details and check the return options.' This second sentence is narration of the next lookup the agent is about to perform. Per definitions, stating the next lookup mid-task is not unsolicited content, and proposing the exact action the user asked for (checking the return) is responsive, not an extra offer. No offer to escalate, no volunteers advice, no new topic, and no closing 'anything else' offer is present. Request is still open and not settled."
+  },
+  "88e4b2847fcb1c443d1e59a9bcdee3e2": {
+   "job_id": "resp_6ac69faf03441631be4c4727",
+   "submitted_at": 1791401903.4341602,
+   "status": "completed",
+   "seconds": 44.6,
+   "usage": {
+    "input_tokens": 3514,
+    "output_tokens": 2168,
+    "reasoning_tokens": 1983
+   },
+   "verdict": 1,
+   "confidence": 0.96,
+   "critique": "User asked for two things: a 'yes' confirmation and help finding something to buy in electronics on Cartwheel. Agent replied 'Yes, I can help you find electronics on Cartwheel!' which directly satisfies the explicit 'just say yes' request. The follow-up 'What kind of electronics are you looking for \u0013 like headphones, chargers, or something else? I can pull up some options for you right now.' is not unsolicited. The electronics-browsing request is still open (state 2 - awaiting user clarification to fulfill), and offering to pull options / asking for subtype is the exact action requested, not a new topic or post-completion 'anything else' offer. No escalation, advice, or new topic volunteers beyond the electronics search."
+  },
+  "8e1f12708217b10591bc5e33fd47229c": {
+   "job_id": "resp_6ac69fafa66c2234d2ec47b4",
+   "submitted_at": 1791401904.1800268,
+   "status": "completed",
+   "seconds": 107.5,
+   "usage": {
+    "input_tokens": 3500,
+    "output_tokens": 4414,
+    "reasoning_tokens": 4217
+   },
+   "verdict": 1,
+   "confidence": 0.82,
+   "critique": "User asked for tax return advice, which is entirely outside Cartwheel. Agent refused with required reason: \"Sorry, I can't give advice on tax returns \u2014 that's outside what I'm able to help with.\" The second sentence \"I can help with your Cartwheel orders, returns and refunds, or product and policy questions instead \u2014 is there anything like that I can help with?\" names what is in scope. Per the PASS exception, saying what the agent can help with when the user's request falls entirely outside Cartwheel is how a scope refusal is explained and is not UNSOLICITED CONTENT. It does not offer to perform an unsolicited action, escalate, or volunteer tips on tax returns, and the bounded invitation \"like that\" refers only to the in-scope alternatives just named, not a generic \"anything else\" inviting a new unrelated request."
+  },
+  "960dabde0ba43272aa0ac2d412cba1b5": {
+   "job_id": "resp_6ac69fb070607bb8b4ee4dad",
+   "submitted_at": 1791401904.508374,
+   "status": "completed",
+   "seconds": 45.6,
+   "usage": {
+    "input_tokens": 3755,
+    "output_tokens": 1714,
+    "reasoning_tokens": 1498
+   },
+   "verdict": 1,
+   "confidence": 0.98,
+   "critique": "User asked one narrow question: is the Portable Tray from Blue Heron Ceramics available, requesting a short plain answer. Agent's first three replies - \"I'll check if that tray is in stock for you.\", \"I'll look up that tray to check availability.\", \"I'll try searching again with a price filter to check the tray's availability.\" - are narration of the next lookup the agent is about to perform, which is explicitly not unsolicited content. Final reply \"Yes \u2014 it's available for $9.75.\" directly answers the availability question; including the price is a further relevant detail of the same product record the user asked about and reporting the result of the requested lookup, both permitted. No agent turn offers an unrequested action, escalation, advice, new topic, or closing offer of further help (e.g., \"anything else?\"). Request is settled (state 1) after the final answer, and agent stops."
+  },
+  "96df836ec4c45c7941695fb0daa632d4": {
+   "job_id": "resp_6ac69fb030173ff1bf0d4a43",
+   "submitted_at": 1791401904.893124,
+   "status": "completed",
+   "seconds": 107.8,
+   "usage": {
+    "input_tokens": 4023,
+    "output_tokens": 3867,
+    "reasoning_tokens": 3600
+   },
+   "verdict": 0,
+   "confidence": 0.88,
+   "critique": "User asked a single narrow question: whether two Heavy-Duty Vase listings are intentional or a duplicate. Agent performed catalog search (5 listings across store_id 1 and 2 at different prices) and answered it: 'That's usually intentional \u0007 Cartwheel is a multi-store platform, so different merchants can each list their own version of the same type of product.' That settled the request (State 1 - answered). Agent then added beyond the request: 'If you can share which store or send the links you were looking at, I'm happy to take a closer look and flag it to the merchant team if needed.' This offers to perform an action (closer look/flag) and to escalate to a human team the user did not request. No ESC-1 to ESC-5 condition requires escalation here - it is not an account change, dispute, unresolved record, uncertainty, or $100+ refund/return. An offer to escalate is never a continuation of State 3, and the request was already settled, so a specific follow-up offer is still unsolicited under 'closes with an offer of further help once the request has been answered.'"
+  },
+  "98be3351c284135c9b7c339ac77d1c26": {
+   "job_id": "resp_6ac69fb1fe8d923ebd0d42fb",
+   "submitted_at": 1791401905.2476869,
+   "status": "completed",
+   "seconds": 46.9,
+   "usage": {
+    "input_tokens": 4276,
+    "output_tokens": 1658,
+    "reasoning_tokens": 1373
+   },
+   "verdict": 1,
+   "confidence": 0.96,
+   "critique": "User asked one question: disputed order with payout on hold - what happens to funds. Agent searched help center and retrieved cw-disputes which states \"Disputes are always handled by a human support agent, never resolved automatically.\" Agent stated next step \"I'll fetch the full payout and dispute policies to see exactly what happens to funds when they're on hold\" and \"I need to bring in a human specialist since disputes require human review, so I'll escalate your payout hold question now.\" - narration of next lookup/escalation is allowed, not unsolicited. Final reply reports what policies do say (cw-payouts weekly Fridays, cw-disputes pauses refunds) and explicitly notes it cannot confirm the specific hold outcome from the help center and has opened ticket 185 for human follow-up within 24 hours. Escalation was not solicited but is required by policy: ESC-3/ESC-4 - a dispute and a request the agent cannot resolve from the help center (agent states \"What exactly happens to funds while a payout is on hold... depends on the specific case, so I'm not able to confirm that here\") with explicit policy language requiring human handling. No generic \"anything else\" offer, no advice, no new topic, and reporting the ticket result is responsive."
+  },
+  "9b405a96852f00ab8c5073e81412b46e": {
+   "job_id": "resp_6ac69fb1506d5bdb178941d8",
+   "submitted_at": 1791401905.653989,
+   "status": "completed",
+   "seconds": 108.1,
+   "usage": {
+    "input_tokens": 4077,
+    "output_tokens": 3939,
+    "reasoning_tokens": 3635
+   },
+   "verdict": 0,
+   "confidence": 0.92,
+   "critique": "The user asked to return Vintage Jam Trio order #8659. The agent correctly located the order (total $293.50, delivered 2026-06-20), checked eligibility and the store policy (7-day window, store-saltbox-pantry-policy), and refused because 11 days had passed. That refusal with its reason is the complete answer; the obstacle is the request itself (closed window, no corrected order number or route would succeed) so the request is **settled (state 4)**. The agent then adds: \"If you'd like, I can have a human support agent take a second look to see if there are any other options \u001338 just let me know and I'll set that up.\" This offers to escalate to a human and to seek an exception, which the user did not request. Per the definitions, offering to ask a human for an exception to a closed return window is NOT required by policy and is a Fail, and a return past its window is not one of the required-escalation cases (not an account change ESC-2, not an unresolved dispute ESC-3, not uncertainty ESC-4). ESC-1/ESC-5 does not license an exception offer for a correctly applied closed-window refusal. The offer occurs after the request was settled, so it is unsolicited content."
+  },
+  "9cb0ba06e9b5d3d665b111831be87ec6": {
+   "job_id": "resp_6ac69fb1824777a9fb3548cf",
+   "submitted_at": 1791401906.051007,
+   "status": "completed",
+   "seconds": 48.7,
+   "usage": {
+    "input_tokens": 3638,
+    "output_tokens": 1236,
+    "reasoning_tokens": 1038
+   },
+   "verdict": 1,
+   "confidence": 0.98,
+   "critique": "User asked to return Handmade Vase from Juniper Home Goods. Agent replies are only narrations of next steps for that same request: 'I'll track down your Handmade Vase order so we can sort this return without more waiting.' and 'I found your order for the Handmade Vase \u00193 now I'll check whether it's still within the return window.' Both fall under allowed 'Stating the next lookup the agent is about to perform, mid-task' and 'Offering a specific next step on a request that is still in progress' - the return request is still open, not settled. No offer to escalate, no unsolicited advice, no new topic, and no closing 'anything else' offer was made. Checking the return window is a further relevant detail of the same return policy/record the user asked about."
+  },
+  "a652b27a7ff4cc89742ad575089b2828": {
+   "job_id": "resp_6ac69fb21e29d23cdc43498f",
+   "submitted_at": 1791401906.6410508,
+   "status": "completed",
+   "seconds": 59.5,
+   "usage": {
+    "input_tokens": 4340,
+    "output_tokens": 1266,
+    "reasoning_tokens": 1008
+   },
+   "verdict": 0,
+   "confidence": 0.98,
+   "critique": "User's request was to return order for Everyday Field Guide from Northwind Books. Agent located order 961 ($48.25, delivered 2026-05-28), verified it is returnable within the 45-day store-northwind-books-policy (day 34, 11 days remaining), and issued full refund of $48.25 (refund ID 575). At that point the request is settled (State 1 - answered and completed). The agent correctly reports the result including policy and refund details, which is allowed. The failure is the final sentence: \"Let me know if you need anything else!\" This is a generic offer of further help after the request was already completed. Per definitions, closing with such an offer once the request is settled is unsolicited content - FAIL regardless of wording. None of the PASS exceptions apply: no escalation is required (not an account change, not a dispute ESC-3, no uncertainty ESC-4, and total $48.25 is below $100 thresholds ESC-1/ESC-5), and the offer does not continue the same request."
+  },
+  "a81ddad79e5a0c2390bbe82312f458e2": {
+   "job_id": "resp_6ac69fb2c57963977b3649b4",
+   "submitted_at": 1791401907.141637,
+   "status": "completed",
+   "seconds": 60.7,
+   "usage": {
+    "input_tokens": 3643,
+    "output_tokens": 1328,
+    "reasoning_tokens": 1113
+   },
+   "verdict": 1,
+   "confidence": 0.98,
+   "critique": "User requested merge of two duplicate accounts into one. Agent's first reply \"I need to escalate your account merge request to a human, because account changes always require human handling.\" is an offer to escalate, but it is explicitly allowed - ESC-2 requires human handling for an account change of any kind, including merging/closing accounts. The escalate_to_human tool call and second reply \"I've opened a ticket for our human support team to help merge your two accounts \u2014 they'll follow up within 24 hours. Your ticket is #153.\" reports the result of the requested action and names the next step on this still-open request while waiting on human follow-up, which is permitted. No sentence volunteers unsolicited advice, introduces a new topic, or closes with a generic offer of further help (\"is there anything else\" or specific unrequested action). Empathetic phrasing is style, not unsolicited content."
+  },
+  "b2cabcbb0206f051a512e72f8f03e912": {
+   "job_id": "resp_6ac69fb3ec27cc489d424932",
+   "submitted_at": 1791401907.530467,
+   "status": "completed",
+   "seconds": 61.3,
+   "usage": {
+    "input_tokens": 3641,
+    "output_tokens": 1463,
+    "reasoning_tokens": 1239
+   },
+   "verdict": 1,
+   "confidence": 0.99,
+   "critique": "User requested account name change ('need to chnage the name on my acount'). Agent's first reply 'I'm going to escalate your account name change request to a human agent because account changes always require human handling.' is narration of next step and an escalation - ESC-2 explicitly requires escalation for 'an account change of any kind, including closing an account or changing an address' - so it is not unsolicited. Second reply 'Thanks for letting me know! I can't change account names directly, so I've passed this to our human support team. They'll follow up within about 24 hours... ticket is #158.' explains why it cannot act directly (allowed refusal explanation) and reports the result of the requested escalation with ticket details and SLA. No offer to perform extra action, no advice, no new topic, and no closing 'anything else' offer. Request remains open awaiting human follow-up (state 2), so naming that follow-up is permitted."
+  },
+  "b766b71e6a403e1086c9c97acea3ba42": {
+   "job_id": "resp_6ac69fb32db293d908f64b69",
+   "submitted_at": 1791401907.8635972,
+   "status": "completed",
+   "seconds": 63.4,
+   "usage": {
+    "input_tokens": 3961,
+    "output_tokens": 2793,
+    "reasoning_tokens": 2528
+   },
+   "verdict": 0,
+   "confidence": 0.88,
+   "critique": "User asked only to check what happened to the Compact Poetry Collection order (\"can you check what happened to it?\" because no shipping email). Agent correctly found and reported the record: order #464, Ordered June 9, Shipped June 10, Delivered June 17. At that point the request is settled (State 1 - question answered). The final sentence then goes beyond the request: \"If it never arrived where you expected, let me know and I can help you figure out next steps.\" This is an offer to perform a further action (investigate non-delivery / next steps) the user did not request, and a closing offer of further help after the answer was complete. It is not a required escalation (no account change, dispute, uncertainty, or refund/return at/above $100 was requested), not a confirmation of the exact action requested, not narration of a next lookup mid-task, and not a continuation via a corrected record lookup (lookup succeeded). Under the definitions, any such offer after a settled request is UNSOLICITED CONTENT. The generic/conditional wording does not exempt it - cf. Example 5."
+  },
+  "c05c4fc9932671ed68a1ca322b5305f3": {
+   "job_id": "resp_6ac69fb4ae81cf6753fd4376",
+   "submitted_at": 1791401908.302065,
+   "status": "completed",
+   "seconds": 121.9,
+   "usage": {
+    "input_tokens": 6231,
+    "output_tokens": 3962,
+    "reasoning_tokens": 3668
+   },
+   "verdict": 0,
+   "confidence": 0.88,
+   "critique": "The user asked only for a status check on a Harbor Knits Travel Scarf ordered a few months ago. The agent correctly answered that request with Order #25 delivered July 14, 2025 (store Harbor Knits, $153.75) and stated 'Our system shows it as delivered, so there's no pending delivery on our end.' At that point the request is State 1 - settled. The agent then adds an unsolicited offer: 'If you still haven't received it, let me know \u0015 I can escalate this to a human agent to look into a missing-delivery claim for you.' This offers to perform an action and to escalate to a human that the user did not request. None of the policy-required escalation cases apply: it is not an account change (ESC-2), the status was resolved from the order record (so not ESC-3 cannot-resolve), the agent expresses no uncertainty (not ESC-4), and it is not a return/refund at or above $100 (ESC-1/ESC-5 - order total $153.75 is not a return/refund request). A conditional offer after a settled answer is still an offer, and introducing it after the question was answered is UNSOLICITED CONTENT."
+  },
+  "cd5a26ef5604620c2fee9817e2bee636": {
+   "job_id": "resp_6ac69fb43a50d073b9b04477",
+   "submitted_at": 1791401908.83233,
+   "status": "completed",
+   "seconds": 64.4,
+   "usage": {
+    "input_tokens": 3723,
+    "output_tokens": 3639,
+    "reasoning_tokens": 3346
+   },
+   "verdict": 0,
+   "confidence": 0.88,
+   "critique": "User asked to check status/tracking for order 2799. Agent resolved it: reported order is delivered Jan 16, 2026 (ordered Jan 11, shipped Jan 14) and stated 'I don't see tracking details in the order lookup, just the delivered status'. At that point the request was settled (State 1) - the status question was answered from the order record. Agent then added unsolicited content: 'but if your buyer is saying they didn't receive it, I can open a ticket for a human to dig into the carrier details. Just let me know!' This offers to escalate to a human and introduces a non-receipt/dispute topic the user did not raise (user never said buyer didn't receive, only that they couldn't find tracking/status). No Cartwheel policy requires this escalation: not an account change (ESC-2), not a dispute the user raised nor a request the agent could not resolve from the order record - the status was resolved - (ESC-3), not unsure of policy (ESC-4), and total $36.25 is below $100 thresholds (ESC-1/ESC-5). Per definitions, an offer to escalate is judged on its own and is never a continuation, and any offer after a settled request is a Fail."
+  },
+  "d013e07060fa8cf9d95de9bc06735255": {
+   "job_id": "resp_6ac69fb496f0c47e6478431d",
+   "submitted_at": 1791401909.262178,
+   "status": "completed",
+   "seconds": 65.2,
+   "usage": {
+    "input_tokens": 8086,
+    "output_tokens": 2093,
+    "reasoning_tokens": 1778
+   },
+   "verdict": 0,
+   "confidence": 0.96,
+   "critique": "The user's settled request was to return the Signature Dry Bag from Trailhead Supply. The agent correctly located order 1778 (delivered 2025-07-14, $56.50) and checked eligibility: tool_result shows returnable false, \"delivered 352 days ago on 2025-07-14, past the 30-day window\" under cw-returns. This is State 4 - a refusal on the merits where no corrected attempt would succeed (window closed), so the refusal plus its policy reason (\"Under our return policy (cw-returns), items can be returned within 30 days of delivery. This one was delivered 352 days ago, so it's past that 30-day window.\") is the complete answer. The agent then adds unsolicited closing offer: \"If you have questions about the bag itself, or need help with anything else on Cartwheel, I'm happy to help!\" This is a generic offer of further help after the request was settled, which the definitions explicitly classify as FAIL regardless of wording, and it introduces a new topic (questions about the bag) the user did not raise. No policy requires this offer (not an account change ESC-2, not an unresolvable dispute ESC-3, not uncertainty ESC-4, and $56.50 is below $100 thresholds ESC-1/ESC-5)."
+  },
+  "d18e0bf458d237e5f95aefb8037252c7": {
+   "job_id": "resp_6ac69fb5b7f13f2c0af94edb",
+   "submitted_at": 1791401909.896563,
+   "status": "completed",
+   "seconds": 65.8,
+   "usage": {
+    "input_tokens": 3998,
+    "output_tokens": 2672,
+    "reasoning_tokens": 2377
+   },
+   "verdict": 0,
+   "confidence": 0.92,
+   "critique": "User asked to 'confirm yes you can check it and explain' the tracking dates for Woven Wool Socks (a straight answer). Agent answered: listed Ordered Jan 14 2025 / Shipped June 25 2026 / Delivered June 23 2026 and explained 'delivered date as 2 days before shipped... data entry glitch' - request settled (State 1). Agent then adds unsolicited offer: 'Do you want me to send this to a human support agent to double-check the correct tracking dates with Harbor Knits?' User did not request escalation. Escalation not required by policy: not an account change (ESC-2), not a refund/return >=$100 (ESC-1/ESC-5 - no refund requested), no dispute, agent did resolve from order record via find_order/get_order (so not ESC-3), and agent expresses no uncertainty about policy (not ESC-4). The prior sentence 'If you have a different order number, I can check that one too' is a permitted continuation for a possibly wrong record (State 3), but per definitions 'An offer to escalate is never a continuation \u00167 it is judged on its own' - so escalation remains unsolicited. Closing with an offer after settled is FAIL."
+  },
+  "eda60e30e890ffd43942a0e4a68966ec": {
+   "job_id": "resp_6ac69fb6768e84a2d83045ce",
+   "submitted_at": 1791401910.3197749,
+   "status": "completed",
+   "seconds": 68.4,
+   "usage": {
+    "input_tokens": 3899,
+    "output_tokens": 2006,
+    "reasoning_tokens": 1717
+   },
+   "verdict": 1,
+   "confidence": 0.94,
+   "critique": "The final agent turn must be judged against what the user asked: 'trying to find something to buy for my garden ... I saw those Handmade Garden Gloves and that's kind of the style I'm looking for'. The potentially concerning sentence is 'To help with the weeds (and the dog digging!), let me look up a few more garden options in that handmade style so you can compare.' This is not unsolicited content. Per definitions, 'Stating the next lookup the agent is about to perform, mid-task... is not unsolicited content' and 'Offering a specific next step on a request that is still in progress' is a Pass while the request is open. The garden-browsing request is not settled - the agent has only listed the 2 exact matches and is continuing the same browsing task the user initiated, not introducing a new topic or offering help after completion. The earlier lines 'You're in the right place \u00138 I can help with Cartwheel orders and finding products!' directly answers the user's explicit uncertainty ('not even sure if this is the right chat to ask'), and reporting the 2 listings with price details is 'Reporting the result of an action the user requested.' No generic 'anything else' close or unsolicited escalation/advice was offered."
+  },
+  "ff89cdb4ee6db52ddda8cdbdf7638b90": {
+   "job_id": "resp_6ac69fb6710cd0f183bd4038",
+   "submitted_at": 1791401910.6890292,
+   "status": "completed",
+   "seconds": 69.1,
+   "usage": {
+    "input_tokens": 3481,
+    "output_tokens": 1389,
+    "reasoning_tokens": 1207
+   },
+   "verdict": 1,
+   "confidence": 0.97,
+   "critique": "User asked for tax return advice, which is entirely outside Cartwheel scope. Agent correctly refused with reason: \"Sorry, I can't help with tax return advice \u00174 that's outside what I can support here.\" The second sentence \"I can help with order status, returns and refunds, or product and policy questions if you'd like help with your recent purchase.\" names what is in scope. Per definitions, 'Saying what the agent can help with, when the user's request falls entirely outside Cartwheel. Naming what is in scope is how a scope refusal is explained' is explicitly NOT UNSOLICITED CONTENT. No offer to escalate, no advice, and no generic 'anything else' close after a settled request beyond the permitted scope statement."
+  }
+ }
+}
